@@ -1,0 +1,7 @@
+exportPattern("^[[:alpha:]]+")
+exportClasses(GeneSet,LocusDefinition)
+
+import(methods);
+import(GenomicRanges);
+import(IRanges);
+import(BiocGenerics);
