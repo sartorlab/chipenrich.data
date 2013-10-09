@@ -13,6 +13,18 @@ PKG FEATURES
 
   o Example ChIP-seq peak datasets 
 
+CHANGES IN VERSION 0.99.3
+-------------------------
+
+NEW FEATURES
+
+  o Locus definitions for mm10
+
+BUG FIXES
+
+  o Mouse mappability gene IDs were incorrect for some locus definitions and 
+    would cause a crash if used
+
 CHANGES IN VERSION 0.99.2
 -------------------------
 
