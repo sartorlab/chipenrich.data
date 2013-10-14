@@ -1,7 +1,7 @@
 Package: chipenrich.data
 Type: Package
 Title: Gene set enrichment analysis for ChIP-seq data
-Version: 0.99.3
+Version: 0.99.4
 Date: 2013-10-07
 Authors@R: c( person(c("Ryan","P."),"Welch",role = c("aut","cre","cph"),email = "welchr@umich.edu"), person("Chee","Lee",role = c("aut"),email = "cheelee@umich.edu"),
                     person(c("Laura","J."),"Scott",role = c("ths"), email = "ljst@umich.edu"), person(c("Maureen","A."),"Sartor",role = c("ths"),email = "sartorma@med.umich.edu"))
