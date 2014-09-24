@@ -1,19 +1,23 @@
 Package: chipenrich.data
 Type: Package
 Title: Gene set enrichment analysis for ChIP-seq data
-Version: 1.1.0
-Date: 2013-10-07
-Authors@R: c( person(c("Ryan","P."),"Welch",role = c("aut","cre","cph"),email = "welchr@umich.edu"), person("Chee","Lee",role = c("aut"),email = "cheelee@umich.edu"),
-                    person(c("Laura","J."),"Scott",role = c("ths"), email = "ljst@umich.edu"), person(c("Maureen","A."),"Sartor",role = c("ths"),email = "sartorma@med.umich.edu"))
+Version: 1.1.1
+Date: 2014-09-24
+Authors@R: c( 
+	person(c("Ryan","P."),"Welch",role = c("aut","cre","cph"),email = "welchr@umich.edu"),
+	person("Chee","Lee",role = c("aut"),email = "cheelee@umich.edu"),
+	person(c("Laura","J."),"Scott",role = c("ths"), email = "ljst@umich.edu"),
+	person(c("Maureen","A."),"Sartor",role = c("ths"),email = "sartorma@med.umich.edu"))
 Depends: R (>= 2.15.0)
 Imports: methods, GenomicRanges (>= 1.10.0), IRanges (>= 1.16.0), BiocGenerics (>= 0.2.0)
 biocViews: ExperimentData
 Description: Supporting data for the chipenrich package. Includes pre-defined gene sets, gene locus definitions, and mappability estimates. 
 License: GPL-3
 LazyLoad: yes
-Packaged: 2013-10-08 22:27:35 UTC; welchr
+Packaged: 2014-09-24 15:31 EST; welchr
 Author: Ryan P. Welch [aut, cre, cph],
-  Chee Lee [aut],
+  Chee Lee [aut, cre],
+  Raymond G. Cavalcante [aut, cre],
   Laura J. Scott [ths],
   Maureen A. Sartor [ths]
-Maintainer: Ryan P. Welch <welchr@umich.edu>
+Maintainer: Ryan P. Welch <welchr@umich.edu>, Chee Lee <cheelee@umich.edu>, Raymond G. Cavalcante <rcavalca@umich.edu>
