@@ -1,3 +1,14 @@
+CHANGES IN VERSION 1.1.4
+
+  o Support for D. melanogaster genome (dm3)
+
+  o All genomes (dm3, hg19, mm9, mm10, and rn4) have the following locus definitions
+    o 1kb, 5kb, 10kb, >10kb, introns, exons, nearest_gene, and nearest_tss
+
+  o New example histone data set, peaks_H3K4me3_GM12878, based on hg19.
+
+  o New gene sets from Reactome for human, mouse, and rat.
+
 CHANGES IN VERSION 1.0
 ----------------------
 
