@@ -1,8 +1,8 @@
 Package: chipenrich.data
 Type: Package
 Title: Gene set enrichment analysis for ChIP-seq data
-Version: 1.1.4
-Date: 2014-09-29
+Version: 1.1.5
+Date: 2014-09-30
 Authors@R: c( 
 	person(c("Ryan","P."),"Welch",role = c("aut","cre","cph"),email = "welchr@umich.edu"),
 	person("Chee","Lee",role = c("aut"),email = "cheelee@umich.edu"),
@@ -14,7 +14,7 @@ biocViews: ExperimentData
 Description: Supporting data for the chipenrich package. Includes pre-defined gene sets, gene locus definitions, and mappability estimates. 
 License: GPL-3
 LazyLoad: yes
-Packaged: 2014-09-29 16:17 EST; welchr
+Packaged: 2014-09-30 13:53 EST; rcavalca
 Author: Ryan P. Welch [aut, cre, cph],
   Chee Lee [aut, cre],
   Raymond G. Cavalcante [aut, cre],
