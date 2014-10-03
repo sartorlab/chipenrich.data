@@ -18,7 +18,9 @@ Genesets are exactly that - sets of genes - as defined in various databases such
 
 Each geneset is stored per genome in the format "geneset.<name of geneset>.<genome build>", use \code{data(package="chipenrich.data")} for a full list. 
 
-Each geneset and the description for how it was generated can be found in the "Geneset Database Information" vignette. Use \code{browseVignettes("chipenrich.data")} for a full list. 
+Each geneset and the description for how it was generated can be found at:
+
+http://sartorlab.ccmb.med.umich.edu/sites/default/files/pdf/geneset_information.pdf.
 
 Gene locus definitions define regions in which peaks are assigned to genes. If a peak falls into a particular gene locus, it is assigned to that gene. Within the package, locus definitions are stored per genome and per definition in the format "locusdef.<genome>.<definition code>". We support multiple definitions currently: 
 
@@ -27,9 +29,13 @@ Gene locus definitions define regions in which peaks are assigned to genes. If a
 	\item \code{nearest_gene}: assigns peaks to the nearest gene. Each gene locus stretches from the upstream midpoint between genes and the downstream midpoint between genes. 
 	\item \code{1kb}: each gene locus is defined as the region 1KB up- and down-stream of the TSS. 
 	\item \code{5kb}: each gene locus is defined as the region 5KB up- and down-stream of the TSS. 
+	\item \code{10kb}: each gene locus is defined as the region 10KB up- and down-stream of the TSS.
+	\item \code{10kb_and_more_upstream}: each gene locus is defined as the region greater than 10KB upstream of the TSS.
+	\item \code{exon}: each gene locus is defined as the exonic regions of each gene.  In the case where exons from multiple transcripts of the same gene may overlap, the region was reduced to one non-overlapping region.
+	\item \code{intron}: each gene locus is defined as the intronic regions of each gene, that is, the region between two non-overlapping exons of transcripts belonging to the same gene.
 }
 
-The mappability datasets stored within this package represent the average mappability per locus definition (above.) They are stored in the following format: "mappa.<genome build>.<locus definition code>.<read length>". Each dataset is simply an entrez ID, and the mappability score computed for the gene under the given locus definition and read length. For more information regarding how mappability is included, please see (Welch & Lee, 2012.) 
+The mappability datasets stored within this package represent the average mappability per locus definition (above.) They are stored in the following format: "mappa.<genome build>.<locus definition code>.<read length>". Each dataset is simply an entrez ID, and the mappability score computed for the gene under the given locus definition and read length. For more information regarding how mappability is included, please see (Welch & Lee, 2014.) 
 
 Example ChIP-seq peak datasets are also included, and can be used for running \code{chipenrich}. Each dataset is stored as "peaks_<name of protein/transcription factor>". Use \code{\link{example_datasets}} or \code{data(package="chipenrich.data")} for a list. 
 
@@ -40,7 +46,7 @@ Ryan Welch \email{welchr@umich.edu}
 }
 
 \references{
-	Welch RP*, Lee C*, Smith RA, Imbriano P, Scott LJ, Sartor MA. 2012. ChIP-Enrich: Gene set enrichment testing for ChIP-Seq data (in preparation.)
+	R.P. Welch*, C. Lee*, R.A. Smith, P. Imbriano, S. Patil, T. Weymouth, L.J. Scott, M.A. Sartor.  "ChIP-Enrich: gene set enrichment testing for ChIP-seq data." Nucl. Acids Res. (2014) 42(13):e105. doi:10.1093/nar/gku463
 }
 
 \examples{
