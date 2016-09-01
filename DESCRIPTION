@@ -1,13 +1,24 @@
 Package: chipenrich.data
 Title: What the Package Does (one line, title case)
-Version: 0.0.0.9000
-Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
-Depends: R (>= 3.3.1)
+Version: 0.0.1
+Date: 2016-08-29
+Authors@R: c(
+	person(c("Ryan P."),"Welch",role = c("aut","cph"),email = "welchr@umich.edu"),
+	person("Chee","Lee",role = c("aut"),email = "cheelee@umich.edu"),
+	person("Raymond G.","Cavalcante",role = c("aut","cre"),email = "rcavalca@umich.edu"),
+	person(c("Laura J."),"Scott",role = c("ths"), email = "ljst@umich.edu"),
+	person(c("Maureen A."),"Sartor",role = c("ths"),email = "sartorma@med.umich.edu"))
+Description: Supporting data for the chipenrich package. Includes pre-defined gene sets, gene locus definitions, and mappability estimates.
+Depends:
+    R (>= 3.3.1)
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
-Suggests: knitr,
+Suggests:
+    knitr,
     rmarkdown,
     testthat
 VignetteBuilder: knitr
+RoxygenNote: 5.0.1
+License: GPL-3
+Maintainer: Raymond G. Cavalcante <rcavalca@umich.edu>
