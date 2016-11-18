@@ -1,22 +1,23 @@
 Package: chipenrich.data
 Type: Package
 Title: Gene set enrichment analysis for ChIP-seq data
-Version: 1.11.0
-Date: 2014-10-03
-Authors@R: c( 
-	person(c("Ryan","P."),"Welch",role = c("aut","cre","cph"),email = "welchr@umich.edu"),
+Version: 1.11.1
+Date: 2016-11-18
+Authors@R: c(
+	person(c("Ryan","P."),"Welch",role = c("aut","cph"),email = "welchr@umich.edu"),
 	person("Chee","Lee",role = c("aut"),email = "cheelee@umich.edu"),
+	person(c("Raymond","G."),"Cavalcante",role = c("aut","cre"),email = "rcavalca@umich.edu"),
 	person(c("Laura","J."),"Scott",role = c("ths"), email = "ljst@umich.edu"),
 	person(c("Maureen","A."),"Sartor",role = c("ths"),email = "sartorma@med.umich.edu"))
-Depends: R (>= 2.15.0)
-Imports: methods, GenomicRanges (>= 1.10.0), IRanges (>= 1.16.0), BiocGenerics (>= 0.2.0)
+Depends: R (>= 3.1.0)
+Imports: methods, GenomicRanges, IRanges, BiocGenerics
 biocViews: ExperimentData, Genome, ChIPSeqData
-Description: Supporting data for the chipenrich package. Includes pre-defined gene sets, gene locus definitions, and mappability estimates. 
+Description: Supporting data for the chipenrich package. Includes pre-defined gene sets, gene locus definitions, and mappability estimates.
 License: GPL-3
 LazyLoad: yes
-Packaged: 2014-10-03 11:00 EST; rcavalca
-Author: Ryan P. Welch [aut, cre, cph],
-  Chee Lee [aut, cre],
+Packaged: 2016-11-18; rcavalca
+Author: Ryan P. Welch [aut, cph],
+  Chee Lee [aut],
   Raymond G. Cavalcante [aut, cre],
   Laura J. Scott [ths],
   Maureen A. Sartor [ths]
