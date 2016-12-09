@@ -126,53 +126,86 @@ library(org.Hs.eg.db)
 ###
 ### Establish databases
 ###
-
     # For the transcripts, TSSs, TESs, and Entrez Gene IDs
     txdb = TxDb.Hsapiens.UCSC.hg19.knownGene
 
     ### Entrez ID to gene symbol mapping
     orgdb = org.Hs.egSYMBOL
-
-###
-### Filter for canonical chromosomes
-###
-
-    seqs = seqlevels(txdb)
-    seqs = seqs[!(grepl('gl',seqs) | grepl('hap',seqs))]
-    seqlevels(txdb) = seqs
-
-###
-### Build GRanges of transcripts, remove those with NA gene_id and make unique
-### according to location + gene_id.
-###
-
-    # Build the transcripts
-    gr = transcripts(txdb, columns=c('gene_id'))
-
-    # Force the gene_id to integer from CharacterList
-    # NOTE: Worth a check that mean(sapply(gr$gene_id, length)) = 1
-    # so we're sure a transcript doesn't have multiple gene_ids.
-    gr$gene_id = as.integer(gr$gene_id)
-
-    # Force the range to have a gene_id
-    # Can't do chipenrich without it
-    gr = gr[!is.na(gr$gene_id)]
-
-    # Enforce uniqueness on location + gene_id
-    gr = unique(gr)
-
-###
-### Attach gene symbols
-###
-
     # Get the gene symbol that are mapped to an entrez gene identifiers
     mapped_genes = mappedkeys(orgdb)
     # Convert to a data.frame
     eg2symbol = as.data.frame(orgdb[mapped_genes])
     eg2symbol$gene_id = as.integer(eg2symbol$gene_id)
 
-    # Join eg2symbol on the gene_id column (allow NAs)
-    gr$symbol = eg2symbol[match(gr$gene_id, eg2symbol$gene_id), 'symbol']
+###
+### Filter for canonical chromosomes
+###
+    seqs = seqlevels(txdb)
+    seqs = seqs[!(grepl('gl',seqs) | grepl('hap',seqs))]
+    seqlevels(txdb) = seqs
+
+###
+### Build GRanges of transcripts exons, and introns.
+### Remove those with NA gene_id and make unique according to location + gene_id.
+###
+    # Transcripts
+        gr = transcripts(txdb, columns=c('gene_id'))
+        gr$gene_id = as.integer(gr$gene_id)
+        gr$symbol = eg2symbol[match(gr$gene_id, eg2symbol$gene_id), 'symbol']
+
+    # Exons
+        grl_exons = exonsBy(txdb, by= 'tx', use.names = TRUE)
+        exons_txname_rle = Rle(names(grl_exons), elementNROWS(grl_exons))
+        exons_txname_vec = as.character(exons_txname_rle)
+
+        gr_exons = unlist(grl_exons, use.names = FALSE)
+        mcols(gr_exons)$tx_name = exons_txname_vec
+
+        # Add Entrez ID and symbol
+        # UCSC TXID and TXNAME to GENEID mapping (for introns and exons)
+        id_maps = AnnotationDbi::select(txdb, keys = names(grl_exons), columns = c('TXID','GENEID'), keytype = 'TXNAME')
+        mcols(gr_exons)$gene_id = id_maps[match(mcols(gr_exons)$tx_name, id_maps$TXNAME), 'GENEID']
+        mcols(gr_exons)$symbol = eg2symbol[match(mcols(gr_exons)$gene_id, eg2symbol$gene_id), 'symbol']
+        # Keep only gene_id and symbol in mcols
+        mcols(gr_exons) = mcols(gr_exons)[,c('gene_id','symbol')]
+
+    # Introns
+        grl_introns = intronsByTranscript(txdb, use.names = TRUE)
+        # Create Rle of the tx_names
+        introns_txname_rle = Rle(names(grl_introns), elementNROWS(grl_introns))
+        introns_txname_vec = as.character(introns_txname_rle)
+        # Unlist and add the tx_names
+        gr_introns = unlist(grl_introns, use.names = FALSE)
+        mcols(gr_introns)$tx_name = introns_txname_vec
+
+        # Add Entrez ID and symbol
+        # NOTE: here we match on the tx_name because the tx_id is not given
+        id_maps = AnnotationDbi::select(txdb, keys = names(grl_introns), columns = c('TXID','GENEID'), keytype = 'TXNAME')
+        mcols(gr_introns)$gene_id = id_maps[match(mcols(gr_introns)$tx_name, id_maps$TXNAME), 'GENEID']
+        mcols(gr_introns)$symbol = eg2symbol[match(mcols(gr_introns)$gene_id, eg2symbol$gene_id), 'symbol']
+        # Keep only gene_id and symbol in mcols
+        mcols(gr_introns) = mcols(gr_introns)[,c('gene_id','symbol')]
+
+    # Force the gene_id to integer from CharacterList
+    # NOTE: Worth a check that mean(sapply(gr$gene_id, length)) = 1
+    # so we're sure a transcript doesn't have multiple gene_ids.
+        gr_exons$gene_id = as.integer(gr_exons$gene_id)
+        gr_introns$gene_id = as.integer(gr_introns$gene_id)
+
+    # Force the range to have a gene_id
+    # Can't do chipenrich without it
+        gr = gr[!is.na(gr$gene_id)]
+        gr_exons = gr_exons[!is.na(gr_exons$gene_id)]
+        gr_introns = gr_introns[!is.na(gr_introns$gene_id)]
+
+    # Enforce uniqueness on location + gene_id
+        gr = unique(gr)
+        gr_exons = unique(gr_exons)
+        gr_introns = unique(gr_introns)
+
+        gr = sort(gr)
+        gr_exons = sort(gr_exons)
+        gr_introns = sort(gr_introns)
 
 ###
 ### Establish correct TSS and TES for each transcript according to strand.
@@ -583,20 +616,20 @@ library(org.Hs.eg.db)
     mcols(gr_onekb_downstream_neg) = mcols(gr)[strand(gr) == '-', c('gene_id','symbol')]
 
     ### Create the >1kb upstream definition
-    gr_onekb_upstream = c(gr_onekb_upstream_pos, gr_onekb_upstream_neg)
-    gr_onekb_upstream = gr_onekb_upstream[which(width(gr_onekb_upstream) > 1)]
+        gr_onekb_upstream = c(gr_onekb_upstream_pos, gr_onekb_upstream_neg)
+        gr_onekb_upstream = gr_onekb_upstream[which(width(gr_onekb_upstream) > 1)]
 
-    gr_onekb_upstream = sort(gr_onekb_upstream)
-    gr_onekb_upstream = unique(gr_onekb_upstream)
+        gr_onekb_upstream = sort(gr_onekb_upstream)
+        gr_onekb_upstream = unique(gr_onekb_upstream)
 
     ### Create the outside 1kb definition
     # Just need to create downstream and add it to the upstream
-    gr_onekb_downstream = c(gr_onekb_downstream_pos, gr_onekb_downstream_neg)
-    gr_onekb_downstream = gr_onekb_downstream[which(width(gr_onekb_downstream) > 1)]
+        gr_onekb_downstream = c(gr_onekb_downstream_pos, gr_onekb_downstream_neg)
+        gr_onekb_downstream = gr_onekb_downstream[which(width(gr_onekb_downstream) > 1)]
 
-    gr_onekb_outside = c(gr_onekb_upstream, gr_onekb_downstream)
-    gr_onekb_outside = sort(gr_onekb_outside)
-    gr_onekb_outside = unique(gr_onekb_outside)
+        gr_onekb_outside = c(gr_onekb_upstream, gr_onekb_downstream)
+        gr_onekb_outside = sort(gr_onekb_outside)
+        gr_onekb_outside = unique(gr_onekb_outside)
 
 ###
 ### 5kb
@@ -620,20 +653,20 @@ library(org.Hs.eg.db)
     mcols(gr_fivekb_downstream_neg) = mcols(gr)[strand(gr) == '-', c('gene_id','symbol')]
 
     ### Create the >1kb upstream definition
-    gr_fivekb_upstream = c(gr_fivekb_upstream_pos, gr_fivekb_upstream_neg)
-    gr_fivekb_upstream = gr_fivekb_upstream[which(width(gr_fivekb_upstream) > 1)]
+        gr_fivekb_upstream = c(gr_fivekb_upstream_pos, gr_fivekb_upstream_neg)
+        gr_fivekb_upstream = gr_fivekb_upstream[which(width(gr_fivekb_upstream) > 1)]
 
-    gr_fivekb_upstream = sort(gr_fivekb_upstream)
-    gr_fivekb_upstream = unique(gr_fivekb_upstream)
+        gr_fivekb_upstream = sort(gr_fivekb_upstream)
+        gr_fivekb_upstream = unique(gr_fivekb_upstream)
 
     ### Create the outside 1kb definition
     # Just need to create downstream and add it to the upstream
-    gr_fivekb_downstream = c(gr_fivekb_downstream_pos, gr_fivekb_downstream_neg)
-    gr_fivekb_downstream = gr_fivekb_downstream[which(width(gr_fivekb_downstream) > 1)]
+        gr_fivekb_downstream = c(gr_fivekb_downstream_pos, gr_fivekb_downstream_neg)
+        gr_fivekb_downstream = gr_fivekb_downstream[which(width(gr_fivekb_downstream) > 1)]
 
-    gr_fivekb_outside = c(gr_fivekb_upstream, gr_fivekb_downstream)
-    gr_fivekb_outside = sort(gr_fivekb_outside)
-    gr_fivekb_outside = unique(gr_fivekb_outside)
+        gr_fivekb_outside = c(gr_fivekb_upstream, gr_fivekb_downstream)
+        gr_fivekb_outside = sort(gr_fivekb_outside)
+        gr_fivekb_outside = unique(gr_fivekb_outside)
 
 ###
 ### 10kb
@@ -657,38 +690,62 @@ library(org.Hs.eg.db)
     mcols(gr_tenkb_downstream_neg) = mcols(gr)[strand(gr) == '-', c('gene_id','symbol')]
 
     ### Create the >1kb upstream definition
-    gr_tenkb_upstream = c(gr_tenkb_upstream_pos, gr_tenkb_upstream_neg)
-    gr_tenkb_upstream = gr_tenkb_upstream[which(width(gr_tenkb_upstream) > 1)]
+        gr_tenkb_upstream = c(gr_tenkb_upstream_pos, gr_tenkb_upstream_neg)
+        gr_tenkb_upstream = gr_tenkb_upstream[which(width(gr_tenkb_upstream) > 1)]
 
-    gr_tenkb_upstream = sort(gr_tenkb_upstream)
-    gr_tenkb_upstream = unique(gr_tenkb_upstream)
+        gr_tenkb_upstream = sort(gr_tenkb_upstream)
+        gr_tenkb_upstream = unique(gr_tenkb_upstream)
 
     ### Create the outside 1kb definition
     # Just need to create downstream and add it to the upstream
-    gr_tenkb_downstream = c(gr_tenkb_downstream_pos, gr_tenkb_downstream_neg)
-    gr_tenkb_downstream = gr_tenkb_downstream[which(width(gr_tenkb_downstream) > 1)]
+        gr_tenkb_downstream = c(gr_tenkb_downstream_pos, gr_tenkb_downstream_neg)
+        gr_tenkb_downstream = gr_tenkb_downstream[which(width(gr_tenkb_downstream) > 1)]
 
-    gr_tenkb_outside = c(gr_tenkb_upstream, gr_tenkb_downstream)
-    gr_tenkb_outside = sort(gr_tenkb_outside)
-    gr_tenkb_outside = unique(gr_tenkb_outside)
+        gr_tenkb_outside = c(gr_tenkb_upstream, gr_tenkb_downstream)
+        gr_tenkb_outside = sort(gr_tenkb_outside)
+        gr_tenkb_outside = unique(gr_tenkb_outside)
 
 ################################################################################
 
 ### Reduce all definitions
 
+message('Building nearest_tss (1/13)...')
 gr_nearest_tss = reduce_gr(gr_nearest_tss)
+
+message('Building nearest_gene (2/13)...')
 gr_nearest_gene = reduce_gr(gr_nearest_gene)
 
+message('Building exons (3/13)...')
+gr_exons = reduce_gr(gr_exons)
+
+message('Building introns (4/13)...')
+gr_introns = reduce_gr(gr_introns)
+
+message('Building <1kb (5/13)...')
 gr_onekb = reduce_gr(gr_onekb)
+
+message('Building <5kb (6/13)...')
 gr_fivekb = reduce_gr(gr_fivekb)
+
+message('Building <10kb (7/13)...')
 gr_tenkb = reduce_gr(gr_tenkb)
 
+message('Building >1kb upstream (8/13)...')
 gr_onekb_upstream = reduce_gr(gr_onekb_upstream)
+
+message('Building >5kb upstream (9/13)...')
 gr_fivekb_upstream = reduce_gr(gr_fivekb_upstream)
+
+message('Building >10kb upstream (10/13)...')
 gr_tenkb_upstream = reduce_gr(gr_tenkb_upstream)
 
+message('Building outside 1kb (11/13)...')
 gr_onekb_outside = reduce_gr(gr_onekb_outside)
+
+message('Building outside 5kb (12/13)...')
 gr_fivekb_outside = reduce_gr(gr_fivekb_outside)
+
+message('Building outside 10kb (13/13)...')
 gr_tenkb_outside = reduce_gr(gr_tenkb_outside)
 
 ################################################################################
@@ -716,6 +773,28 @@ write.table(df_ngene_symbol, file = '~/Desktop/ngene_symbol.bed', sep='\t', quot
 
 df_ngene_geneid = df_ngene[,c('seqnames','start','end','gene_id','score','strand')]
 write.table(df_ngene_geneid, file = '~/Desktop/ngene_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
+
+# exons
+df_exons = data.frame(gr_exons, stringsAsFactors=F)
+df_exons$strand = '.'
+df_exons$score = 1000
+
+df_exons_symbol = df_exons[,c('seqnames','start','end','symbol','score','strand')]
+write.table(df_exons_symbol, file = '~/Desktop/exons_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
+
+df_exons_geneid = df_exons[,c('seqnames','start','end','gene_id','score','strand')]
+write.table(df_exons_geneid, file = '~/Desktop/exons_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
+
+# introns
+df_introns = data.frame(gr_introns, stringsAsFactors=F)
+df_introns$strand = '.'
+df_introns$score = 1000
+
+df_introns_symbol = df_introns[,c('seqnames','start','end','symbol','score','strand')]
+write.table(df_introns_symbol, file = '~/Desktop/introns_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
+
+df_introns_geneid = df_introns[,c('seqnames','start','end','gene_id','score','strand')]
+write.table(df_introns_geneid, file = '~/Desktop/introns_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 # onekb
 df_onekb = data.frame(gr_onekb, stringsAsFactors=F)
@@ -823,9 +902,12 @@ write.table(df_tenkb_outside_geneid, file = '~/Desktop/tenkb_outside_geneid.bed'
 library(chipenrich.data)
 data(locusdef.hg19.nearest_tss, package = 'chipenrich.data')
 data(locusdef.hg19.nearest_gene, package = 'chipenrich.data')
+data(locusdef.hg19.exon, package = 'chipenrich.data')
+data(locusdef.hg19.intron, package = 'chipenrich.data')
 data(locusdef.hg19.1kb, package = 'chipenrich.data')
 data(locusdef.hg19.5kb, package = 'chipenrich.data')
 data(locusdef.hg19.10kb, package = 'chipenrich.data')
+data(locusdef.hg19.10kb_and_more_upstream, package = 'chipenrich.data')
 
 ce_ntss = locusdef.hg19.nearest_tss@dframe
 ce_ntss$strand = '.'
@@ -838,6 +920,18 @@ ce_ngene$strand = '.'
 ce_ngene$score = 1000
 ce_ngene = ce_ngene[,c('chrom','start','end','geneid','score','strand')]
 write.table(ce_ngene, file = '~/Desktop/ce_ngene.bed', sep='\t', quote = F, col.names=F, row.names=F)
+
+ce_exons = locusdef.hg19.exon@dframe
+ce_exons$strand = '.'
+ce_exons$score = 1000
+ce_exons = ce_exons[,c('chrom','start','end','geneid','score','strand')]
+write.table(ce_exons, file = '~/Desktop/ce_exons.bed', sep='\t', quote = F, col.names=F, row.names=F)
+
+ce_introns = locusdef.hg19.intron@dframe
+ce_introns$strand = '.'
+ce_introns$score = 1000
+ce_introns = ce_introns[,c('chrom','start','end','geneid','score','strand')]
+write.table(ce_introns, file = '~/Desktop/ce_introns.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 ce_1kb = locusdef.hg19.1kb@dframe
 ce_1kb$strand = '.'
