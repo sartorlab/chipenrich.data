@@ -24,6 +24,8 @@
 # precede(b, a)
 # follow(b, a)
 
+library(rtracklayer)
+library(readr)
 library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 library(org.Hs.eg.db)
 
@@ -137,6 +139,12 @@ library(org.Hs.eg.db)
     eg2symbol = as.data.frame(orgdb[mapped_genes])
     eg2symbol$gene_id = as.integer(eg2symbol$gene_id)
 
+    ### GENCODE annotations
+    gencode = readGFF('ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz')
+
+    ### ENSEMBL transcript ID to Entrez ID mapping
+    ens2eg = read_tsv('ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz', col_names = c('ens_id','gene_id'))
+
 ###
 ### Filter for canonical chromosomes
 ###
@@ -206,6 +214,33 @@ library(org.Hs.eg.db)
         gr = sort(gr)
         gr_exons = sort(gr_exons)
         gr_introns = sort(gr_introns)
+
+###
+### FILTER OUT certain categories from GENCODE and based on symbol
+###
+    # gene_type codes from GENCODE to filter out
+    filter_gencode_types = c('3prime_overlapping_ncRNA', 'scRNA', 'snoRNA', 'snRNA', 'scaRNA')
+
+    filter_types_ensembl_ids = unique(unlist(subset(gencode, gene_type %in% filter_gencode_types)$Parent, use.names = FALSE))
+
+    # Filter gene_name with -AS for antisense
+    filter_AS_ensembl_ids = unique(unlist(gencode[grepl('-AS', gencode$gene_name), 'Parent'], use.names = FALSE))
+
+    # Combine
+    filter_ensembl_ids = c(filter_types_ensembl_ids, filter_AS_ensembl_ids)
+
+    # Get the Entrez IDs to use in gr, gr_exons, and gr_introns
+    filter_entrez_ids = unique(unlist(subset(ens2eg, ens_id %in% filter_ensembl_ids)$gene_id, use.names = FALSE))
+
+    # Filter from gr, gr_exons, and gr_introns
+    gr = gr[!(gr$gene_id %in% filter_entrez_ids)]
+    gr_exons = gr_exons[!(gr_exons$gene_id %in% filter_entrez_ids)]
+    gr_introns = gr_introns[!(gr_introns$gene_id %in% filter_entrez_ids)]
+
+    # Filter from gr, gr_exons, and gr_introns those with symbols beginning with LOC
+    gr = gr[!grepl('^LOC', gr$symbol)]
+    gr_exons = gr_exons[!grepl('^LOC', gr_exons$symbol)]
+    gr_introns = gr_introns[!grepl('^LOC', gr_introns$symbol)]
 
 ###
 ### Establish correct TSS and TES for each transcript according to strand.
@@ -280,20 +315,6 @@ library(org.Hs.eg.db)
         both = TRUE,
         use.names = FALSE,
         ignore.strand = TRUE)
-
-###
-### Filter for snoRNA, psueudogenes, lncRNA (?)
-###
-
-    # Look for snoRNA/miRNAs (COME BACK TO THIS)
-
-    # snoquery = query(ah, c('sno/miRNA', 'Homo sapiens'))
-    # snoid = names(snoquery)[snoquery$genome == 'hg19']
-    # snodb = ah[[snoid]]
-    #
-    # # Match snoRNAs/miRNAs by location
-    # found_snomi = which(match(gr, snodb) != 'NA')
-    # found_snomi_idx = found_snomi[!is.na(found_snomi)]
 
 ################################################################################
 ### Build intermediate boundaries as GRanges to construct locus definitions
@@ -758,10 +779,10 @@ df_ntss$strand = '.'
 df_ntss$score = 1000
 
 df_ntss_symbol = df_ntss[,c('seqnames','start','end','symbol','score','strand')]
-write.table(df_ntss_symbol, file = '~/Desktop/ntss_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(df_ntss_symbol, file = '~/Desktop/postfilter/ntss_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 df_ntss_geneid = df_ntss[,c('seqnames','start','end','gene_id','score','strand')]
-write.table(df_ntss_geneid, file = '~/Desktop/ntss_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(df_ntss_geneid, file = '~/Desktop/postfilter/ntss_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 # ngene
 df_ngene = data.frame(gr_nearest_gene, stringsAsFactors=F)
@@ -769,10 +790,10 @@ df_ngene$strand = '.'
 df_ngene$score = 1000
 
 df_ngene_symbol = df_ngene[,c('seqnames','start','end','symbol','score','strand')]
-write.table(df_ngene_symbol, file = '~/Desktop/ngene_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(df_ngene_symbol, file = '~/Desktop/postfilter/ngene_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 df_ngene_geneid = df_ngene[,c('seqnames','start','end','gene_id','score','strand')]
-write.table(df_ngene_geneid, file = '~/Desktop/ngene_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(df_ngene_geneid, file = '~/Desktop/postfilter/ngene_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 # exons
 df_exons = data.frame(gr_exons, stringsAsFactors=F)
@@ -780,10 +801,10 @@ df_exons$strand = '.'
 df_exons$score = 1000
 
 df_exons_symbol = df_exons[,c('seqnames','start','end','symbol','score','strand')]
-write.table(df_exons_symbol, file = '~/Desktop/exons_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(df_exons_symbol, file = '~/Desktop/postfilter/exons_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 df_exons_geneid = df_exons[,c('seqnames','start','end','gene_id','score','strand')]
-write.table(df_exons_geneid, file = '~/Desktop/exons_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(df_exons_geneid, file = '~/Desktop/postfilter/exons_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 # introns
 df_introns = data.frame(gr_introns, stringsAsFactors=F)
@@ -791,10 +812,10 @@ df_introns$strand = '.'
 df_introns$score = 1000
 
 df_introns_symbol = df_introns[,c('seqnames','start','end','symbol','score','strand')]
-write.table(df_introns_symbol, file = '~/Desktop/introns_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(df_introns_symbol, file = '~/Desktop/postfilter/introns_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 df_introns_geneid = df_introns[,c('seqnames','start','end','gene_id','score','strand')]
-write.table(df_introns_geneid, file = '~/Desktop/introns_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(df_introns_geneid, file = '~/Desktop/postfilter/introns_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 # onekb
 df_onekb = data.frame(gr_onekb, stringsAsFactors=F)
@@ -802,10 +823,10 @@ df_onekb$strand = '.'
 df_onekb$score = 1000
 
 df_onekb_symbol = df_onekb[,c('seqnames','start','end','symbol','score','strand')]
-write.table(df_onekb_symbol, file = '~/Desktop/onekb_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(df_onekb_symbol, file = '~/Desktop/postfilter/onekb_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 df_onekb_geneid = df_onekb[,c('seqnames','start','end','gene_id','score','strand')]
-write.table(df_onekb_geneid, file = '~/Desktop/onekb_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(df_onekb_geneid, file = '~/Desktop/postfilter/onekb_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 # fivekb
 df_fivekb = data.frame(gr_fivekb, stringsAsFactors=F)
@@ -813,10 +834,10 @@ df_fivekb$strand = '.'
 df_fivekb$score = 1000
 
 df_fivekb_symbol = df_fivekb[,c('seqnames','start','end','symbol','score','strand')]
-write.table(df_fivekb_symbol, file = '~/Desktop/fivekb_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(df_fivekb_symbol, file = '~/Desktop/postfilter/fivekb_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 df_fivekb_geneid = df_fivekb[,c('seqnames','start','end','gene_id','score','strand')]
-write.table(df_fivekb_geneid, file = '~/Desktop/fivekb_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(df_fivekb_geneid, file = '~/Desktop/postfilter/fivekb_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 # tenkb
 df_tenkb = data.frame(gr_tenkb, stringsAsFactors=F)
@@ -824,10 +845,10 @@ df_tenkb$strand = '.'
 df_tenkb$score = 1000
 
 df_tenkb_symbol = df_tenkb[,c('seqnames','start','end','symbol','score','strand')]
-write.table(df_tenkb_symbol, file = '~/Desktop/tenkb_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(df_tenkb_symbol, file = '~/Desktop/postfilter/tenkb_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 df_tenkb_geneid = df_tenkb[,c('seqnames','start','end','gene_id','score','strand')]
-write.table(df_tenkb_geneid, file = '~/Desktop/tenkb_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(df_tenkb_geneid, file = '~/Desktop/postfilter/tenkb_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 # onekb_upstream
 df_onekb_upstream = data.frame(gr_onekb_upstream, stringsAsFactors=F)
@@ -835,10 +856,10 @@ df_onekb_upstream$strand = '.'
 df_onekb_upstream$score = 1000
 
 df_onekb_upstream_symbol = df_onekb_upstream[,c('seqnames','start','end','symbol','score','strand')]
-write.table(df_onekb_upstream_symbol, file = '~/Desktop/onekb_upstream_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(df_onekb_upstream_symbol, file = '~/Desktop/postfilter/onekb_upstream_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 df_onekb_upstream_geneid = df_onekb_upstream[,c('seqnames','start','end','gene_id','score','strand')]
-write.table(df_onekb_upstream_geneid, file = '~/Desktop/onekb_upstream_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(df_onekb_upstream_geneid, file = '~/Desktop/postfilter/onekb_upstream_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 # fivekb_upstream
 df_fivekb_upstream = data.frame(gr_fivekb_upstream, stringsAsFactors=F)
@@ -846,10 +867,10 @@ df_fivekb_upstream$strand = '.'
 df_fivekb_upstream$score = 1000
 
 df_fivekb_upstream_symbol = df_fivekb_upstream[,c('seqnames','start','end','symbol','score','strand')]
-write.table(df_fivekb_upstream_symbol, file = '~/Desktop/fivekb_upstream_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(df_fivekb_upstream_symbol, file = '~/Desktop/postfilter/fivekb_upstream_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 df_fivekb_upstream_geneid = df_fivekb_upstream[,c('seqnames','start','end','gene_id','score','strand')]
-write.table(df_fivekb_upstream_geneid, file = '~/Desktop/fivekb_upstream_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(df_fivekb_upstream_geneid, file = '~/Desktop/postfilter/fivekb_upstream_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 # tenkb_upstream
 df_tenkb_upstream = data.frame(gr_tenkb_upstream, stringsAsFactors=F)
@@ -857,10 +878,10 @@ df_tenkb_upstream$strand = '.'
 df_tenkb_upstream$score = 1000
 
 df_tenkb_upstream_symbol = df_tenkb_upstream[,c('seqnames','start','end','symbol','score','strand')]
-write.table(df_tenkb_upstream_symbol, file = '~/Desktop/tenkb_upstream_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(df_tenkb_upstream_symbol, file = '~/Desktop/postfilter/tenkb_upstream_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 df_tenkb_upstream_geneid = df_tenkb_upstream[,c('seqnames','start','end','gene_id','score','strand')]
-write.table(df_tenkb_upstream_geneid, file = '~/Desktop/tenkb_upstream_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(df_tenkb_upstream_geneid, file = '~/Desktop/postfilter/tenkb_upstream_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 # onekb_outside
 df_onekb_outside = data.frame(gr_onekb_outside, stringsAsFactors=F)
@@ -868,10 +889,10 @@ df_onekb_outside$strand = '.'
 df_onekb_outside$score = 1000
 
 df_onekb_outside_symbol = df_onekb_outside[,c('seqnames','start','end','symbol','score','strand')]
-write.table(df_onekb_outside_symbol, file = '~/Desktop/onekb_outside_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(df_onekb_outside_symbol, file = '~/Desktop/postfilter/onekb_outside_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 df_onekb_outside_geneid = df_onekb_outside[,c('seqnames','start','end','gene_id','score','strand')]
-write.table(df_onekb_outside_geneid, file = '~/Desktop/onekb_outside_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(df_onekb_outside_geneid, file = '~/Desktop/postfilter/onekb_outside_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 # fivekb_outside
 df_fivekb_outside = data.frame(gr_fivekb_outside, stringsAsFactors=F)
@@ -879,10 +900,10 @@ df_fivekb_outside$strand = '.'
 df_fivekb_outside$score = 1000
 
 df_fivekb_outside_symbol = df_fivekb_outside[,c('seqnames','start','end','symbol','score','strand')]
-write.table(df_fivekb_outside_symbol, file = '~/Desktop/fivekb_outside_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(df_fivekb_outside_symbol, file = '~/Desktop/postfilter/fivekb_outside_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 df_fivekb_outside_geneid = df_fivekb_outside[,c('seqnames','start','end','gene_id','score','strand')]
-write.table(df_fivekb_outside_geneid, file = '~/Desktop/fivekb_outside_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(df_fivekb_outside_geneid, file = '~/Desktop/postfilter/fivekb_outside_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 # tenkb_outside
 df_tenkb_outside = data.frame(gr_tenkb_outside, stringsAsFactors=F)
@@ -890,10 +911,10 @@ df_tenkb_outside$strand = '.'
 df_tenkb_outside$score = 1000
 
 df_tenkb_outside_symbol = df_tenkb_outside[,c('seqnames','start','end','symbol','score','strand')]
-write.table(df_tenkb_outside_symbol, file = '~/Desktop/tenkb_outside_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(df_tenkb_outside_symbol, file = '~/Desktop/postfilter/tenkb_outside_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 df_tenkb_outside_geneid = df_tenkb_outside[,c('seqnames','start','end','gene_id','score','strand')]
-write.table(df_tenkb_outside_geneid, file = '~/Desktop/tenkb_outside_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(df_tenkb_outside_geneid, file = '~/Desktop/postfilter/tenkb_outside_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 ################################################################################
 
@@ -913,48 +934,48 @@ ce_ntss = locusdef.hg19.nearest_tss@dframe
 ce_ntss$strand = '.'
 ce_ntss$score = 1000
 ce_ntss = ce_ntss[,c('chrom','start','end','geneid','score','strand')]
-write.table(ce_ntss, file = '~/Desktop/ce_ntss.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(ce_ntss, file = '~/Desktop/postfilter/ce_ntss.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 ce_ngene = locusdef.hg19.nearest_gene@dframe
 ce_ngene$strand = '.'
 ce_ngene$score = 1000
 ce_ngene = ce_ngene[,c('chrom','start','end','geneid','score','strand')]
-write.table(ce_ngene, file = '~/Desktop/ce_ngene.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(ce_ngene, file = '~/Desktop/postfilter/ce_ngene.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 ce_exons = locusdef.hg19.exon@dframe
 ce_exons$strand = '.'
 ce_exons$score = 1000
 ce_exons = ce_exons[,c('chrom','start','end','geneid','score','strand')]
-write.table(ce_exons, file = '~/Desktop/ce_exons.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(ce_exons, file = '~/Desktop/postfilter/ce_exons.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 ce_introns = locusdef.hg19.intron@dframe
 ce_introns$strand = '.'
 ce_introns$score = 1000
 ce_introns = ce_introns[,c('chrom','start','end','geneid','score','strand')]
-write.table(ce_introns, file = '~/Desktop/ce_introns.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(ce_introns, file = '~/Desktop/postfilter/ce_introns.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 ce_1kb = locusdef.hg19.1kb@dframe
 ce_1kb$strand = '.'
 ce_1kb$score = 1000
 ce_1kb = ce_1kb[,c('chrom','start','end','geneid','score','strand')]
-write.table(ce_1kb, file = '~/Desktop/ce_1kb.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(ce_1kb, file = '~/Desktop/postfilter/ce_1kb.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 ce_5kb = locusdef.hg19.5kb@dframe
 ce_5kb$strand = '.'
 ce_5kb$score = 1000
 ce_5kb = ce_5kb[,c('chrom','start','end','geneid','score','strand')]
-write.table(ce_5kb, file = '~/Desktop/ce_5kb.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(ce_5kb, file = '~/Desktop/postfilter/ce_5kb.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 ce_10kb = locusdef.hg19.10kb@dframe
 ce_10kb$strand = '.'
 ce_10kb$score = 1000
 ce_10kb = ce_10kb[,c('chrom','start','end','geneid','score','strand')]
-write.table(ce_10kb, file = '~/Desktop/ce_10kb.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(ce_10kb, file = '~/Desktop/postfilter/ce_10kb.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 ce_10kb_upstream = locusdef.hg19.10kb_and_more_upstream@dframe
 ce_10kb_upstream$strand = '.'
 ce_10kb_upstream$score = 1000
 ce_10kb_upstream = ce_10kb_upstream[,c('chrom','start','end','geneid','score','strand')]
-write.table(ce_10kb_upstream, file = '~/Desktop/ce_10kb_upstream.bed', sep='\t', quote = F, col.names=F, row.names=F)
+write.table(ce_10kb_upstream, file = '~/Desktop/postfilter/ce_10kb_upstream.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 ################################################################################
