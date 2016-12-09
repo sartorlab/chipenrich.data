@@ -420,13 +420,7 @@ library(org.Hs.eg.db)
     gr$follow_left[follow_left_left_closer_idx] = gr$left_follow_left[follow_left_left_closer_idx]
 
 ################################################################################
-### Build locus definitions
-################################################################################
-
-################################################################################
-### Create the nearest_tss definition by using the midpoints of:
-### [gr$tss_precede_tss, start(gr$gr_tss)] and [start(gr$gr_tss), gr$tss_follow_tss]
-### as the start and endpoints of the nearest_tss range.
+### Determine boundaries of nearest_tss definitions. Essentially, midpoints btw TSSs
 
     # Setup IRanges from which to take the midpoints for the nearest_tss boundaries
     gr$ntss_start_range = IRanges(start = start(gr$tss_precede_tss), end = start(gr$gr_tss))
@@ -437,6 +431,15 @@ library(org.Hs.eg.db)
     gr$ntss_start = mid(gr$ntss_start_range) + 1
     gr$ntss_end = mid(gr$ntss_end_range)
 
+################################################################################
+### Build locus definitions
+################################################################################
+
+################################################################################
+### Create the nearest_tss definition by using the midpoints of:
+### [gr$tss_precede_tss, start(gr$gr_tss)] and [start(gr$gr_tss), gr$tss_follow_tss]
+### as the start and endpoints of the nearest_tss range.
+
     # Build the nearest_tss definition
     gr_nearest_tss = GRanges(
         seqnames = seqnames(gr),
@@ -444,6 +447,8 @@ library(org.Hs.eg.db)
         strand = '*',
         gene_id = gr$gene_id,
         symbol = gr$symbol)
+
+    gr$nearest_tss = granges(gr_nearest_tss)
 
     # Enforce uniqueness of ranges/gene_id
     gr_nearest_tss = sort(gr_nearest_tss)
@@ -457,101 +462,215 @@ library(org.Hs.eg.db)
 ### ranges up until the preceding and following. There will initially be some
 ### redundancy that will be fixed with reduce() in a GRangesList on the gene_id.
 
-# Setup IRanges from which to take the midpoints for the nearest_gene boundaries
-gr$ngene_left_start_range = IRanges(start = start(gr$precede_left), end = start(gr))
-gr$ngene_left_end_range = IRanges(start = start(gr), end = start(gr$follow_left))
+    # Setup IRanges from which to take the midpoints for the nearest_gene boundaries
+    gr$ngene_left_start_range = IRanges(start = start(gr$precede_left), end = start(gr))
+    gr$ngene_left_end_range = IRanges(start = start(gr), end = start(gr$follow_left))
 
-gr$ngene_right_start_range = IRanges(start = start(gr$precede_right), end = end(gr))
-gr$ngene_right_end_range = IRanges(start = end(gr), end = start(gr$follow_right))
+    gr$ngene_right_start_range = IRanges(start = start(gr$precede_right), end = end(gr))
+    gr$ngene_right_end_range = IRanges(start = end(gr), end = start(gr$follow_right))
 
-# The nearest_gene boundaries are defined as the midpoints between the left
-# end of the range and the closest preceding TSS or TES and the right end of the
-# range and the closest following TSS or TES.
-gr$ngene_left_start = mid(gr$ngene_left_start_range) + 1
-gr$ngene_left_end = mid(gr$ngene_left_end_range)
+    # The nearest_gene boundaries are defined as the midpoints between the left
+    # end of the range and the closest preceding TSS or TES and the right end of the
+    # range and the closest following TSS or TES.
+    gr$ngene_left_start = mid(gr$ngene_left_start_range) + 1
+    gr$ngene_left_end = mid(gr$ngene_left_end_range)
 
-gr$ngene_right_start = mid(gr$ngene_right_start_range) + 1
-gr$ngene_right_end = mid(gr$ngene_right_end_range)
+    gr$ngene_right_start = mid(gr$ngene_right_start_range) + 1
+    gr$ngene_right_end = mid(gr$ngene_right_end_range)
 
-# Build the nearest_gene definition
-gr_nearest_gene = c(
-    GRanges(
-        seqnames = seqnames(gr),
-        ranges = IRanges(start = gr$ngene_left_start, end = gr$ngene_left_end),
-        strand = '*',
-        gene_id = gr$gene_id,
-        symbol = gr$symbol),
-    GRanges(
-        seqnames = seqnames(gr),
-        ranges = IRanges(start = gr$ngene_right_start, end = gr$ngene_right_end),
-        strand = '*',
-        gene_id = gr$gene_id,
-        symbol = gr$symbol)
-)
+    # Build the nearest_gene definition
+    gr_nearest_gene = c(
+        GRanges(
+            seqnames = seqnames(gr),
+            ranges = IRanges(start = gr$ngene_left_start, end = gr$ngene_left_end),
+            strand = '*',
+            gene_id = gr$gene_id,
+            symbol = gr$symbol),
+        GRanges(
+            seqnames = seqnames(gr),
+            ranges = IRanges(start = gr$ngene_right_start, end = gr$ngene_right_end),
+            strand = '*',
+            gene_id = gr$gene_id,
+            symbol = gr$symbol)
+    )
 
-# Enforce uniqueness of ranges/gene_id
-gr_nearest_gene = sort(gr_nearest_gene)
-gr_nearest_gene = unique(gr_nearest_gene)
+    # Enforce uniqueness of ranges/gene_id
+    gr_nearest_gene = sort(gr_nearest_gene)
+    gr_nearest_gene = unique(gr_nearest_gene)
 
 ################################################################################
 
 ### Create 1kb definition by determining if the 1kb start or end exceeds
 ### ntss_start and ntss_end, respectively.
-onekb_start_less_ntss_start_idx = which(start(gr$onekb) < gr$ntss_start)
-onekb_end_greater_ntss_end_idx = which(end(gr$onekb) > gr$ntss_end)
+    onekb_start_less_ntss_start_idx = which(start(gr$onekb) < gr$ntss_start)
+    onekb_end_greater_ntss_end_idx = which(end(gr$onekb) > gr$ntss_end)
 
-# Fix the 1kb ranges that go too far
-gr$onekb_fix = gr$onekb
-start(gr$onekb_fix)[onekb_start_less_ntss_start_idx] = gr$ntss_start[onekb_start_less_ntss_start_idx]
-end(gr$onekb_fix)[onekb_end_greater_ntss_end_idx] = gr$ntss_end[onekb_end_greater_ntss_end_idx]
+    # Fix the 1kb ranges that go too far
+    gr$onekb_fix = gr$onekb
+    start(gr$onekb_fix)[onekb_start_less_ntss_start_idx] = gr$ntss_start[onekb_start_less_ntss_start_idx]
+    end(gr$onekb_fix)[onekb_end_greater_ntss_end_idx] = gr$ntss_end[onekb_end_greater_ntss_end_idx]
 
-# Create the 1kb definition
-gr_onekb = gr$onekb_fix
-strand(gr_onekb) = '*'
-mcols(gr_onekb) = mcols(gr)[,c('gene_id','symbol')]
+    # Create the 1kb definition
+    gr_onekb = gr$onekb_fix
+    strand(gr_onekb) = '*'
+    mcols(gr_onekb) = mcols(gr)[,c('gene_id','symbol')]
 
-gr_onekb = sort(gr_onekb)
-gr_onekb = unique(gr_onekb)
+    gr_onekb = sort(gr_onekb)
+    gr_onekb = unique(gr_onekb)
 
 ################################################################################
 
 ### Create 5kb definition by determining if the 5kb start or end exceeds
 ### ntss_start and ntss_end, respectively.
-fivekb_start_less_ntss_start_idx = which(start(gr$fivekb) < gr$ntss_start)
-fivekb_end_greater_ntss_end_idx = which(end(gr$fivekb) > gr$ntss_end)
+    fivekb_start_less_ntss_start_idx = which(start(gr$fivekb) < gr$ntss_start)
+    fivekb_end_greater_ntss_end_idx = which(end(gr$fivekb) > gr$ntss_end)
 
-# Fix the 5kb ranges that go too far
-gr$fivekb_fix = gr$fivekb
-start(gr$fivekb_fix)[fivekb_start_less_ntss_start_idx] = gr$ntss_start[fivekb_start_less_ntss_start_idx]
-end(gr$fivekb_fix)[fivekb_end_greater_ntss_end_idx] = gr$ntss_end[fivekb_end_greater_ntss_end_idx]
+    # Fix the 5kb ranges that go too far
+    gr$fivekb_fix = gr$fivekb
+    start(gr$fivekb_fix)[fivekb_start_less_ntss_start_idx] = gr$ntss_start[fivekb_start_less_ntss_start_idx]
+    end(gr$fivekb_fix)[fivekb_end_greater_ntss_end_idx] = gr$ntss_end[fivekb_end_greater_ntss_end_idx]
 
-### Create the 5kb definition
-gr_fivekb = gr$fivekb_fix
-strand(gr_fivekb) = '*'
-mcols(gr_fivekb) = mcols(gr)[,c('gene_id','symbol')]
+    ### Create the 5kb definition
+    gr_fivekb = gr$fivekb_fix
+    strand(gr_fivekb) = '*'
+    mcols(gr_fivekb) = mcols(gr)[,c('gene_id','symbol')]
 
-gr_fivekb = sort(gr_fivekb)
-gr_fivekb = unique(gr_fivekb)
+    gr_fivekb = sort(gr_fivekb)
+    gr_fivekb = unique(gr_fivekb)
 
 ################################################################################
 
 ### Create 10kb definition by determining if the 10kb start or end exceeds
 ### ntss_start and ntss_end, respectively.
-tenkb_start_less_ntss_start_idx = which(start(gr$tenkb) < gr$ntss_start)
-tenkb_end_greater_ntss_end_idx = which(end(gr$tenkb) > gr$ntss_end)
+    tenkb_start_less_ntss_start_idx = which(start(gr$tenkb) < gr$ntss_start)
+    tenkb_end_greater_ntss_end_idx = which(end(gr$tenkb) > gr$ntss_end)
 
-# Fix the 10kb ranges that go too far
-gr$tenkb_fix = gr$tenkb
-start(gr$tenkb_fix)[tenkb_start_less_ntss_start_idx] = gr$ntss_start[tenkb_start_less_ntss_start_idx]
-end(gr$tenkb_fix)[tenkb_end_greater_ntss_end_idx] = gr$ntss_end[tenkb_end_greater_ntss_end_idx]
+    # Fix the 10kb ranges that go too far
+    gr$tenkb_fix = gr$tenkb
+    start(gr$tenkb_fix)[tenkb_start_less_ntss_start_idx] = gr$ntss_start[tenkb_start_less_ntss_start_idx]
+    end(gr$tenkb_fix)[tenkb_end_greater_ntss_end_idx] = gr$ntss_end[tenkb_end_greater_ntss_end_idx]
 
-### Create a simple 10kb definition
-gr_tenkb = gr$tenkb_fix
-strand(gr_tenkb) = '*'
-mcols(gr_tenkb) = mcols(gr)[,c('gene_id','symbol')]
+    ### Create a simple 10kb definition
+    gr_tenkb = gr$tenkb_fix
+    strand(gr_tenkb) = '*'
+    mcols(gr_tenkb) = mcols(gr)[,c('gene_id','symbol')]
 
-gr_tenkb = sort(gr_tenkb)
-gr_tenkb = unique(gr_tenkb)
+    gr_tenkb = sort(gr_tenkb)
+    gr_tenkb = unique(gr_tenkb)
+
+################################################################################
+### Create the outside nkb definitions
+
+###
+### 1kb
+###
+    # Use restrict to get left and right side of 1kb def up to nearest_tss
+    gr$outside_onekb_left = restrict(gr$nearest_tss, start = start(gr$nearest_tss), end = start(gr$onekb_fix))
+    gr$outside_onekb_right = restrict(gr$nearest_tss, start = end(gr$onekb_fix), end = end(gr$nearest_tss))
+
+    # Determine upstream ranges based on the strand
+    gr_onekb_upstream_pos = gr$outside_onekb_left[strand(gr) == '+']
+    mcols(gr_onekb_upstream_pos) = mcols(gr)[strand(gr) == '+', c('gene_id','symbol')]
+
+    gr_onekb_upstream_neg = gr$outside_onekb_right[strand(gr) == '-']
+    mcols(gr_onekb_upstream_neg) = mcols(gr)[strand(gr) == '-', c('gene_id','symbol')]
+
+    # Determine downstream ranges based on the strand
+    gr_onekb_downstream_pos = gr$outside_onekb_right[strand(gr) == '+']
+    mcols(gr_onekb_downstream_pos) = mcols(gr)[strand(gr) == '+', c('gene_id','symbol')]
+
+    gr_onekb_downstream_neg = gr$outside_onekb_left[strand(gr) == '-']
+    mcols(gr_onekb_downstream_neg) = mcols(gr)[strand(gr) == '-', c('gene_id','symbol')]
+
+    ### Create the >1kb upstream definition
+    gr_onekb_upstream = c(gr_onekb_upstream_pos, gr_onekb_upstream_neg)
+    gr_onekb_upstream = gr_onekb_upstream[which(width(gr_onekb_upstream) > 1)]
+
+    gr_onekb_upstream = sort(gr_onekb_upstream)
+    gr_onekb_upstream = unique(gr_onekb_upstream)
+
+    ### Create the outside 1kb definition
+    # Just need to create downstream and add it to the upstream
+    gr_onekb_downstream = c(gr_onekb_downstream_pos, gr_onekb_downstream_neg)
+    gr_onekb_downstream = gr_onekb_downstream[which(width(gr_onekb_downstream) > 1)]
+
+    gr_onekb_outside = c(gr_onekb_upstream, gr_onekb_downstream)
+    gr_onekb_outside = sort(gr_onekb_outside)
+    gr_onekb_outside = unique(gr_onekb_outside)
+
+###
+### 5kb
+###
+    # Use restrict to get left and right side of 1kb def up to nearest_tss
+    gr$outside_fivekb_left = restrict(gr$nearest_tss, start = start(gr$nearest_tss), end = start(gr$fivekb_fix))
+    gr$outside_fivekb_right = restrict(gr$nearest_tss, start = end(gr$fivekb_fix), end = end(gr$nearest_tss))
+
+    # Determine upstream ranges based on the strand
+    gr_fivekb_upstream_pos = gr$outside_fivekb_left[strand(gr) == '+']
+    mcols(gr_fivekb_upstream_pos) = mcols(gr)[strand(gr) == '+', c('gene_id','symbol')]
+
+    gr_fivekb_upstream_neg = gr$outside_fivekb_right[strand(gr) == '-']
+    mcols(gr_fivekb_upstream_neg) = mcols(gr)[strand(gr) == '-', c('gene_id','symbol')]
+
+    # Determine downstream ranges based on the strand
+    gr_fivekb_downstream_pos = gr$outside_fivekb_right[strand(gr) == '+']
+    mcols(gr_fivekb_downstream_pos) = mcols(gr)[strand(gr) == '+', c('gene_id','symbol')]
+
+    gr_fivekb_downstream_neg = gr$outside_fivekb_left[strand(gr) == '-']
+    mcols(gr_fivekb_downstream_neg) = mcols(gr)[strand(gr) == '-', c('gene_id','symbol')]
+
+    ### Create the >1kb upstream definition
+    gr_fivekb_upstream = c(gr_fivekb_upstream_pos, gr_fivekb_upstream_neg)
+    gr_fivekb_upstream = gr_fivekb_upstream[which(width(gr_fivekb_upstream) > 1)]
+
+    gr_fivekb_upstream = sort(gr_fivekb_upstream)
+    gr_fivekb_upstream = unique(gr_fivekb_upstream)
+
+    ### Create the outside 1kb definition
+    # Just need to create downstream and add it to the upstream
+    gr_fivekb_downstream = c(gr_fivekb_downstream_pos, gr_fivekb_downstream_neg)
+    gr_fivekb_downstream = gr_fivekb_downstream[which(width(gr_fivekb_downstream) > 1)]
+
+    gr_fivekb_outside = c(gr_fivekb_upstream, gr_fivekb_downstream)
+    gr_fivekb_outside = sort(gr_fivekb_outside)
+    gr_fivekb_outside = unique(gr_fivekb_outside)
+
+###
+### 10kb
+###
+    # Use restrict to get left and right side of 1kb def up to nearest_tss
+    gr$outside_tenkb_left = restrict(gr$nearest_tss, start = start(gr$nearest_tss), end = start(gr$tenkb_fix))
+    gr$outside_tenkb_right = restrict(gr$nearest_tss, start = end(gr$tenkb_fix), end = end(gr$nearest_tss))
+
+    # Determine upstream ranges based on the strand
+    gr_tenkb_upstream_pos = gr$outside_tenkb_left[strand(gr) == '+']
+    mcols(gr_tenkb_upstream_pos) = mcols(gr)[strand(gr) == '+', c('gene_id','symbol')]
+
+    gr_tenkb_upstream_neg = gr$outside_tenkb_right[strand(gr) == '-']
+    mcols(gr_tenkb_upstream_neg) = mcols(gr)[strand(gr) == '-', c('gene_id','symbol')]
+
+    # Determine downstream ranges based on the strand
+    gr_tenkb_downstream_pos = gr$outside_tenkb_right[strand(gr) == '+']
+    mcols(gr_tenkb_downstream_pos) = mcols(gr)[strand(gr) == '+', c('gene_id','symbol')]
+
+    gr_tenkb_downstream_neg = gr$outside_tenkb_left[strand(gr) == '-']
+    mcols(gr_tenkb_downstream_neg) = mcols(gr)[strand(gr) == '-', c('gene_id','symbol')]
+
+    ### Create the >1kb upstream definition
+    gr_tenkb_upstream = c(gr_tenkb_upstream_pos, gr_tenkb_upstream_neg)
+    gr_tenkb_upstream = gr_tenkb_upstream[which(width(gr_tenkb_upstream) > 1)]
+
+    gr_tenkb_upstream = sort(gr_tenkb_upstream)
+    gr_tenkb_upstream = unique(gr_tenkb_upstream)
+
+    ### Create the outside 1kb definition
+    # Just need to create downstream and add it to the upstream
+    gr_tenkb_downstream = c(gr_tenkb_downstream_pos, gr_tenkb_downstream_neg)
+    gr_tenkb_downstream = gr_tenkb_downstream[which(width(gr_tenkb_downstream) > 1)]
+
+    gr_tenkb_outside = c(gr_tenkb_upstream, gr_tenkb_downstream)
+    gr_tenkb_outside = sort(gr_tenkb_outside)
+    gr_tenkb_outside = unique(gr_tenkb_outside)
 
 ################################################################################
 
@@ -559,9 +678,18 @@ gr_tenkb = unique(gr_tenkb)
 
 gr_nearest_tss = reduce_gr(gr_nearest_tss)
 gr_nearest_gene = reduce_gr(gr_nearest_gene)
+
 gr_onekb = reduce_gr(gr_onekb)
 gr_fivekb = reduce_gr(gr_fivekb)
 gr_tenkb = reduce_gr(gr_tenkb)
+
+gr_onekb_upstream = reduce_gr(gr_onekb_upstream)
+gr_fivekb_upstream = reduce_gr(gr_fivekb_upstream)
+gr_tenkb_upstream = reduce_gr(gr_tenkb_upstream)
+
+gr_onekb_outside = reduce_gr(gr_onekb_outside)
+gr_fivekb_outside = reduce_gr(gr_fivekb_outside)
+gr_tenkb_outside = reduce_gr(gr_tenkb_outside)
 
 ################################################################################
 
@@ -622,6 +750,72 @@ write.table(df_tenkb_symbol, file = '~/Desktop/tenkb_symbol.bed', sep='\t', quot
 df_tenkb_geneid = df_tenkb[,c('seqnames','start','end','gene_id','score','strand')]
 write.table(df_tenkb_geneid, file = '~/Desktop/tenkb_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
+# onekb_upstream
+df_onekb_upstream = data.frame(gr_onekb_upstream, stringsAsFactors=F)
+df_onekb_upstream$strand = '.'
+df_onekb_upstream$score = 1000
+
+df_onekb_upstream_symbol = df_onekb_upstream[,c('seqnames','start','end','symbol','score','strand')]
+write.table(df_onekb_upstream_symbol, file = '~/Desktop/onekb_upstream_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
+
+df_onekb_upstream_geneid = df_onekb_upstream[,c('seqnames','start','end','gene_id','score','strand')]
+write.table(df_onekb_upstream_geneid, file = '~/Desktop/onekb_upstream_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
+
+# fivekb_upstream
+df_fivekb_upstream = data.frame(gr_fivekb_upstream, stringsAsFactors=F)
+df_fivekb_upstream$strand = '.'
+df_fivekb_upstream$score = 1000
+
+df_fivekb_upstream_symbol = df_fivekb_upstream[,c('seqnames','start','end','symbol','score','strand')]
+write.table(df_fivekb_upstream_symbol, file = '~/Desktop/fivekb_upstream_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
+
+df_fivekb_upstream_geneid = df_fivekb_upstream[,c('seqnames','start','end','gene_id','score','strand')]
+write.table(df_fivekb_upstream_geneid, file = '~/Desktop/fivekb_upstream_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
+
+# tenkb_upstream
+df_tenkb_upstream = data.frame(gr_tenkb_upstream, stringsAsFactors=F)
+df_tenkb_upstream$strand = '.'
+df_tenkb_upstream$score = 1000
+
+df_tenkb_upstream_symbol = df_tenkb_upstream[,c('seqnames','start','end','symbol','score','strand')]
+write.table(df_tenkb_upstream_symbol, file = '~/Desktop/tenkb_upstream_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
+
+df_tenkb_upstream_geneid = df_tenkb_upstream[,c('seqnames','start','end','gene_id','score','strand')]
+write.table(df_tenkb_upstream_geneid, file = '~/Desktop/tenkb_upstream_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
+
+# onekb_outside
+df_onekb_outside = data.frame(gr_onekb_outside, stringsAsFactors=F)
+df_onekb_outside$strand = '.'
+df_onekb_outside$score = 1000
+
+df_onekb_outside_symbol = df_onekb_outside[,c('seqnames','start','end','symbol','score','strand')]
+write.table(df_onekb_outside_symbol, file = '~/Desktop/onekb_outside_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
+
+df_onekb_outside_geneid = df_onekb_outside[,c('seqnames','start','end','gene_id','score','strand')]
+write.table(df_onekb_outside_geneid, file = '~/Desktop/onekb_outside_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
+
+# fivekb_outside
+df_fivekb_outside = data.frame(gr_fivekb_outside, stringsAsFactors=F)
+df_fivekb_outside$strand = '.'
+df_fivekb_outside$score = 1000
+
+df_fivekb_outside_symbol = df_fivekb_outside[,c('seqnames','start','end','symbol','score','strand')]
+write.table(df_fivekb_outside_symbol, file = '~/Desktop/fivekb_outside_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
+
+df_fivekb_outside_geneid = df_fivekb_outside[,c('seqnames','start','end','gene_id','score','strand')]
+write.table(df_fivekb_outside_geneid, file = '~/Desktop/fivekb_outside_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
+
+# tenkb_outside
+df_tenkb_outside = data.frame(gr_tenkb_outside, stringsAsFactors=F)
+df_tenkb_outside$strand = '.'
+df_tenkb_outside$score = 1000
+
+df_tenkb_outside_symbol = df_tenkb_outside[,c('seqnames','start','end','symbol','score','strand')]
+write.table(df_tenkb_outside_symbol, file = '~/Desktop/tenkb_outside_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
+
+df_tenkb_outside_geneid = df_tenkb_outside[,c('seqnames','start','end','gene_id','score','strand')]
+write.table(df_tenkb_outside_geneid, file = '~/Desktop/tenkb_outside_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
+
 ################################################################################
 
 ### Output old CE ldefs for sanity checks in Genome Browser
@@ -662,5 +856,11 @@ ce_10kb$strand = '.'
 ce_10kb$score = 1000
 ce_10kb = ce_10kb[,c('chrom','start','end','geneid','score','strand')]
 write.table(ce_10kb, file = '~/Desktop/ce_10kb.bed', sep='\t', quote = F, col.names=F, row.names=F)
+
+ce_10kb_upstream = locusdef.hg19.10kb_and_more_upstream@dframe
+ce_10kb_upstream$strand = '.'
+ce_10kb_upstream$score = 1000
+ce_10kb_upstream = ce_10kb_upstream[,c('chrom','start','end','geneid','score','strand')]
+write.table(ce_10kb_upstream, file = '~/Desktop/ce_10kb_upstream.bed', sep='\t', quote = F, col.names=F, row.names=F)
 
 ################################################################################
