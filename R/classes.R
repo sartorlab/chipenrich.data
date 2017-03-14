@@ -21,7 +21,6 @@ setClass("GeneSet",representation(
 setClass("LocusDefinition", representation(
   dframe = "data.frame",
   granges = "GenomicRanges",
-  chrom2iranges = "list",
   genome.build = "character",
   organism = "character"
 ),

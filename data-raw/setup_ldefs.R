@@ -30,6 +30,191 @@ library(TxDb.Hsapiens.UCSC.hg19.knownGene)
 library(org.Hs.eg.db)
 
 ################################################################################
+### Workflow
+###                                txdb                    orgdb
+###                                  |                       |
+###                                  -------------------------
+###                                  |           |           |
+###                  build_transcript_gr()   build_exons_introns_gr()
+###                                  |           |           |
+###                        gr_transcripts     gr_exons     gr_introns
+###                                  |           |           |
+###                                  -------------------------
+###                                              |
+###                  gencode + ens2eg -> filter_gencode_types()
+###                                              |
+###                  eg2symbol -> filter_readthrough_transcripts()
+###                                              |
+###                                  -------------------------
+###                                  |           |           |
+###                        gr_transcripts     gr_exons   gr_introns
+###                                  |           |           |
+###                 add_ntss_precursors()        |           |
+###                                  |      reduce_gr()  reduce_gr()
+###                add_ngene_precursors()        |           |
+###                                  |           |           |
+###       add_nkb_precursors(width = 1000)       |           |
+###       add_nkb_precursors(width = 5000)       |           |
+###      add_nkb_precursors(width = 10000)       |           |
+###                                  |           |           |
+###               build_ldef_nearest_tss()       |           |
+###                                  |           |           |
+###              build_ldef_nearest_gene()       |           |
+###                                  |           |           |
+###          build_ldef_nkb(1000,'inside')       |           |
+###        build_ldef_nkb(1000,'upstream')       |           |
+###         build_ldef_nkb(1000,'outside')       |           |
+###                                  |           |           |
+###          build_ldef_nkb(5000,'inside')       |           |
+###        build_ldef_nkb(5000,'upstream')       |           |
+###         build_ldef_nkb(5000,'outside')       |           |
+###                                  |           |           |
+###         build_ldef_nkb(10000,'inside')       |           |
+###       build_ldef_nkb(10000,'upstream')       |           |
+###        build_ldef_nkb(10000,'outside')       |           |
+###                                  |           |           |
+###                                  -------------------------
+###                                              |
+###                               convert to LocusDefinition class
+###                                              |
+###                                       output to /data
+###
+################################################################################
+
+################################################################################
+### Build base GRanges
+################################################################################
+
+    ###
+    ### Transcripts
+    ###
+    build_transcript_gr = function(txdb, eg2symbol) {
+        # Get transcripts with Entrez IDs and add gene symbols
+        gr = transcripts(txdb, columns=c('gene_id'))
+        gr$gene_id = as.integer(gr$gene_id)
+        gr$symbol = eg2symbol[match(gr$gene_id, eg2symbol$gene_id), 'symbol']
+
+        # Only admit transcripts with Entrez IDs
+        gr = gr[!is.na(gr$gene_id)]
+
+        gr = unique(gr)
+        gr = sort(gr)
+
+        return(gr)
+    }
+
+    ###
+    ### Exons and introns
+    ###
+    build_exons_introns_gr = function(txdb, eg2symbol, type = c('exons','introns')) {
+        type = match.arg(type)
+
+        if(type == 'exons') {
+            grl = exonsBy(txdb, by= 'tx', use.names = TRUE)
+        } else {
+            grl = intronsByTranscript(txdb, use.names = TRUE)
+        }
+
+        txname_rle = Rle(names(grl), elementNROWS(grl))
+        txname_vec = as.character(txname_rle)
+
+        gr = unlist(grl, use.names = FALSE)
+        mcols(gr)$tx_name = txname_vec
+
+        # Add Entrez ID and symbol
+        # UCSC TXID and TXNAME to GENEID mapping (for introns and exons)
+        id_maps = AnnotationDbi::select(txdb, keys = names(grl), columns = c('TXID','GENEID'), keytype = 'TXNAME')
+        mcols(gr)$gene_id = id_maps[match(mcols(gr)$tx_name, id_maps$TXNAME), 'GENEID']
+        mcols(gr)$symbol = eg2symbol[match(mcols(gr)$gene_id, eg2symbol$gene_id), 'symbol']
+        # Keep only gene_id and symbol in mcols
+        mcols(gr) = mcols(gr)[,c('gene_id','symbol')]
+
+        # Force the gene_id to integer from CharacterList
+        # NOTE: Worth a check that mean(sapply(gr$gene_id, length)) = 1
+        # so we're sure a transcript doesn't have multiple gene_ids.
+            gr$gene_id = as.integer(gr$gene_id)
+
+        # Force the range to have a gene_id
+        # Can't do chipenrich without it
+            gr = gr[!is.na(gr$gene_id)]
+
+        # Enforce uniqueness on location + gene_id
+            gr = unique(gr)
+            gr = sort(gr)
+
+        return(gr)
+    }
+
+################################################################################
+### Filter Entrez Gene IDs that correspond to certain GENCODE types
+################################################################################
+
+    filter_gencode_types = function(gr, gencode, ens2eg) {
+        # gene_type codes from GENCODE to filter out
+        filter_gencode_types = c('3prime_overlapping_ncRNA', 'scRNA', 'snoRNA', 'snRNA', 'scaRNA')
+
+        filter_types_ensembl_ids = unique(unlist(subset(gencode, gene_type %in% filter_gencode_types)$Parent, use.names = FALSE))
+
+        # Filter gene_name with -AS for antisense
+        filter_AS_ensembl_ids = unique(unlist(gencode[grepl('-AS', gencode$gene_name), 'Parent'], use.names = FALSE))
+
+        # Combine
+        filter_ensembl_ids = c(filter_types_ensembl_ids, filter_AS_ensembl_ids)
+
+        # Get the Entrez IDs to use in gr, gr_exons, and gr_introns
+        filter_entrez_ids = unique(unlist(subset(ens2eg, ens_id %in% filter_ensembl_ids)$gene_id, use.names = FALSE))
+
+        # Filter from gr
+        gr = gr[!(gr$gene_id %in% filter_entrez_ids)]
+
+        # Filter from gr those with symbols beginning with LOC
+        gr = gr[!grepl('^LOC', gr$symbol)]
+
+        return(gr)
+    }
+
+################################################################################
+### Filter readthrough symbols, e.g. APITD1-CORT
+################################################################################
+
+    filter_readthrough_transcripts = function(gr, egGENENAME) {
+        ### Based on 'through' in gene name
+            # Get a data.frame of Entrez IDs mapped to gene names
+            mapped_genes = mappedkeys(egGENENAME)
+            gene_names = as.data.frame(egGENENAME[mapped_genes])
+
+            # Gene Entrez IDs whose gene names have 'through' in the name
+            through_idx = grep('through', gene_names$gene_name)
+            through_egid = unique(gene_names[through_idx, 'gene_id'])
+
+        ### Based on - alone
+            dash_readthroughs_idx = grep('-', gr$symbol)
+            dash_readthroughs = mcols(gr[dash_readthroughs_idx])[, c('gene_id','symbol')]
+
+            # Take this as the universe of possible
+            symbol_universe = grep('-', gr$symbol, value=T, invert=T)
+
+            # Split the possible_readthroughs by the -
+            dash_readthroughs_split = strsplit(dash_readthroughs$symbol, '-')
+
+            # Figure out which are valid
+            is_dash_readthrough = sapply(dash_readthroughs_split, function(drs){
+                return(all(drs %in% symbol_universe))
+            })
+
+            dash_readthroughs = dash_readthroughs[is_dash_readthrough,]
+            dash_readthroughs_egid = unique(dash_readthroughs$gene_id)
+
+        ### Combine the Entrez IDs from both methods
+            combined_readthroughs_egid = unique(c(through_egid, dash_readthroughs_egid))
+
+        ### Get rid of the things in gr with Entrez IDs in combined_readthroughs_egid
+        gr = gr[!(gr$gene_id %in% combined_readthroughs_egid)]
+
+        return(gr)
+    }
+
+################################################################################
 ### Tweaks to precede() and follow() to fix when either function returns NA.
 ### Turn NA into the end of the chromosome (follow) or the start (precede).
 ### Use the seqinfo() of the subject GRanges to determine length of chromosomes.
@@ -44,30 +229,16 @@ library(org.Hs.eg.db)
             strand = '*',
             seqinfo = seqinfo(subject))
 
+        # Add start ranges to subject so there are no NAs in follow()
+        subject = sort(c(subject, gr_chr_start))
+
         # Determine indices of ranges in subject that precede items in x
         precede_idx = follow(x, subject, ignore.strand = TRUE)
 
-        # Determine which are NA. These are the x ranges at the beginning of a chromosome
-        na_idx = which(is.na(precede_idx))
-
-        # Reset the NA indices to themselves
-        precede_idx[na_idx] = match(subject[na_idx], subject)
-
         # Create initial draft of GRanges to return
-        tmp_gr = granges(subject[precede_idx])
+        gr = granges(subject[precede_idx])
 
-        # Determine seqnames that are NA. NOTE: There should be at most one per chromosome
-        # since there can only be one first or last range per chromosome.
-        subject_na_seqnames = as.character(seqnames(subject[na_idx]))
-        gr_chr_start_seqnames = as.character(seqnames(gr_chr_start))
-
-        # Create a GRanges to actually fix the na_idx
-        tmp_fix_gr = gr_chr_start[match(subject_na_seqnames, gr_chr_start_seqnames)]
-
-        # Apply the fix
-        tmp_gr[na_idx] = tmp_fix_gr
-
-        return(tmp_gr)
+        return(gr)
     }
 
     subject_following_x = function(x, subject) {
@@ -79,903 +250,570 @@ library(org.Hs.eg.db)
             strand = '*',
             seqinfo = seqinfo(subject))
 
+        # Add end ranges to subject so there are no NAs in precede()
+        subject = sort(c(subject, gr_chr_end))
+
         # Determine indices of ranges in subject that precede items in x
         follow_idx = precede(x, subject, ignore.strand = TRUE)
 
-        # Determine which are NA. These are the x ranges at the beginning of a chromosome
-        na_idx = which(is.na(follow_idx))
-
-        # Reset the NA indices to themselves
-        follow_idx[na_idx] = match(subject[na_idx], subject)
-
         # Create initial draft of GRanges to return
-        tmp_gr = granges(subject[follow_idx])
+        gr = granges(subject[follow_idx])
 
-        # Determine seqnames that are NA. NOTE: There should be at most one per chromosome
-        # since there can only be one first or last range per chromosome.
-        subject_na_seqnames = as.character(seqnames(subject[na_idx]))
-        gr_chr_end_seqnames = as.character(seqnames(gr_chr_end))
-
-        # Create a GRanges to actually fix the na_idx
-        tmp_fix_gr = gr_chr_end[match(subject_na_seqnames, gr_chr_end_seqnames)]
-
-        # Apply the fix
-        tmp_gr[na_idx] = tmp_fix_gr
-
-        return(tmp_gr)
+        return(gr)
     }
 
-    reduce_gr = function(gr) {
-        message('Splitting on gene_id...')
+################################################################################
+### Everything you need for TSS and nkb definitions right here!
+################################################################################
+    add_ntss_precursors = function(gr) {
+        pos_idx = which(strand(gr) == '+')
+        neg_idx = which(strand(gr) == '-')
+
+        # Add an integer column for the TSS
+        mcols(gr)$tss = 0
+        mcols(gr[pos_idx])$tss = start(gr)[pos_idx]
+        mcols(gr[neg_idx])$tss = end(gr)[neg_idx]
+
+        # Add a GRanges column for the TSS
+        mcols(gr)$gr_tss = GRanges(
+            seqnames = seqnames(gr),
+            ranges = IRanges(start = gr$tss, end = gr$tss),
+            strand = strand(gr),
+            seqinfo = seqinfo(gr))
+
+        # Add GRanges columns for the following and preceding TSSs
+        gr$tss_follow_tss = subject_following_x(gr$gr_tss, gr$gr_tss)
+        gr$tss_precede_tss = subject_preceding_x(gr$gr_tss, gr$gr_tss)
+
+        ### Determine boundaries of nearest_tss definitions. Essentially, midpoints btw TSSs
+
+        # Add IRanges columns for starts and ends of locus def for transcripts
+        # which will be used to take the midpoint
+        gr$ntss_start_range = IRanges(start = start(gr$tss_precede_tss), end = start(gr$gr_tss))
+        gr$ntss_end_range = IRanges(start = start(gr$gr_tss), end = start(gr$tss_follow_tss))
+
+        # Add integer columns for start and end of locus def for transcript
+        gr$ntss_start = mid(gr$ntss_start_range) + 1
+        gr$ntss_end = mid(gr$ntss_end_range)
+
+        # Add GRanges column of the final nearest_tss locus def
+        gr$nearest_tss = GRanges(
+            seqnames = seqnames(gr),
+            ranges = IRanges(start = gr$ntss_start, end = gr$ntss_end),
+            strand = '*')
+
+        return(gr)
+    }
+
+################################################################################
+### Add gr_left and gr_right mcols() to the input GRanges
+################################################################################
+    add_ngene_precursors = function(gr) {
+        # Add GRanges for the left and right end of the feature
+        mcols(gr)$gr_left = GRanges(
+            seqnames = seqnames(gr),
+            ranges = IRanges(start = start(gr), end = start(gr)),
+            strand = strand(gr),
+            seqinfo = seqinfo(gr))
+
+        mcols(gr)$gr_right = GRanges(
+            seqnames = seqnames(gr),
+            ranges = IRanges(start = end(gr), end = end(gr)),
+            strand = strand(gr),
+            seqinfo = seqinfo(gr))
+
+        # Combine the left and rights so it will find whichever is closest
+        gr_combined = sort(c(gr$gr_right, gr$gr_left))
+
+        # Add GRanges for precede and follow for left and right ends
+        gr$precede_right = subject_preceding_x(gr$gr_right, gr_combined)
+        gr$follow_right = subject_following_x(gr$gr_right, gr_combined)
+
+        gr$precede_left = subject_preceding_x(gr$gr_left, gr_combined)
+        gr$follow_left = subject_following_x(gr$gr_left, gr_combined)
+
+        # Add IRanges with which to take midpoints for the nearest_gene definition
+        ngene_left_start_range = IRanges(start = start(gr$precede_left), end = start(gr))
+        ngene_left_end_range = IRanges(start = start(gr), end = start(gr$follow_left))
+
+        ngene_right_start_range = IRanges(start = start(gr$precede_right), end = end(gr))
+        ngene_right_end_range = IRanges(start = end(gr), end = start(gr$follow_right))
+
+        # Add integer columns representing the start and end of the left and right sides
+        # The nearest_gene boundaries are defined as the midpoints between the left
+        # end of the range and the closest preceding TSS or TES and the right end of the
+        # range and the closest following TSS or TES.
+        gr$ngene_left_start = mid(ngene_left_start_range) + 1
+        gr$ngene_left_end = mid(ngene_left_end_range)
+
+        gr$ngene_right_start = mid(ngene_right_start_range) + 1
+        gr$ngene_right_end = mid(ngene_right_end_range)
+
+        return(gr)
+    }
+
+################################################################################
+### Create nkb related objects
+################################################################################
+
+    add_nkb_precursors = function(gr, width) {
+        ### Create shortcodes for nkbs
+        if(width == 1000) {
+            short_code = '1kb'
+        } else if (width == 5000) {
+            short_code = '5kb'
+        } else if (width == 10000) {
+            short_code = '10kb'
+        }
+
+        ### nkb base
+            gr_nkb = flank(
+                x = gr$gr_tss,
+                width = width,
+                both = TRUE,
+                use.names = FALSE,
+                ignore.strand = TRUE)
+            seqinfo(gr_nkb) = seqinfo(gr_transcripts)
+
+        ### Inside nkb of TSS
+            ### Create nkb definition by determining if the nkb start or end exceeds
+            ### ntss_start and ntss_end, respectively.
+            nkb_start_less_ntss_start_idx = which(start(gr_nkb) < gr$ntss_start)
+            nkb_end_greater_ntss_end_idx = which(end(gr_nkb) > gr$ntss_end)
+
+            # Fix the nkb ranges that go too far and add gene_id and symbol columns
+            gr_nkb_fix = gr_nkb
+            start(gr_nkb_fix)[nkb_start_less_ntss_start_idx] = gr$ntss_start[nkb_start_less_ntss_start_idx]
+            end(gr_nkb_fix)[nkb_end_greater_ntss_end_idx] = gr$ntss_end[nkb_end_greater_ntss_end_idx]
+            gr_nkb_fix$gene_id = gr$gene_id
+            gr_nkb_fix$symbol = gr$symbol
+
+        ### Outside nkb of TSS
+            # Use restrict to get left and right side of 1kb def up to nearest_tss
+            gr_outside_nkb_left = restrict(gr$nearest_tss, start = start(gr$nearest_tss), end = start(gr_nkb_fix))
+            gr_outside_nkb_right = restrict(gr$nearest_tss, start = end(gr_nkb_fix), end = end(gr$nearest_tss))
+
+            # Determine upstream ranges based on the strand
+            gr_nkb_upstream_pos = gr_outside_nkb_left[strand(gr) == '+']
+            mcols(gr_nkb_upstream_pos) = mcols(gr)[strand(gr) == '+', c('gene_id','symbol')]
+            strand(gr_nkb_upstream_pos) = '+'
+
+            gr_nkb_upstream_neg = gr_outside_nkb_right[strand(gr) == '-']
+            mcols(gr_nkb_upstream_neg) = mcols(gr)[strand(gr) == '-', c('gene_id','symbol')]
+            strand(gr_nkb_upstream_neg) = '-'
+
+            # Determine downstream ranges based on the strand
+            gr_nkb_downstream_pos = gr_outside_nkb_right[strand(gr) == '+']
+            mcols(gr_nkb_downstream_pos) = mcols(gr)[strand(gr) == '+', c('gene_id','symbol')]
+            strand(gr_nkb_downstream_pos) = '+'
+
+            gr_nkb_downstream_neg = gr_outside_nkb_left[strand(gr) == '-']
+            mcols(gr_nkb_downstream_neg) = mcols(gr)[strand(gr) == '-', c('gene_id','symbol')]
+            strand(gr_nkb_downstream_neg) = '-'
+
+            # Recombine the upstream and downstream strands
+            gr_nkb_upstream = c(gr_nkb_upstream_pos, gr_nkb_upstream_neg)
+            seqinfo(gr_nkb_upstream) = seqinfo(gr)
+
+            gr_nkb_downstream = c(gr_nkb_downstream_pos, gr_nkb_downstream_neg)
+            seqinfo(gr_nkb_downstream) = seqinfo(gr)
+
+        ### Add gr_nkb_fix, gr_nkb_upstream, and gr_nkb_downstream to mcols(gr)
+            gr$gr_nkb = gr_nkb_fix
+            gr$gr_nkb_upstream = gr_nkb_upstream
+            gr$gr_nkb_downstream = gr_nkb_downstream
+
+            # Rename the columns
+            colnames(mcols(gr))[which(colnames(mcols(gr)) == 'gr_nkb')] = sprintf('gr_%s', short_code)
+            colnames(mcols(gr))[which(colnames(mcols(gr)) == 'gr_nkb_upstream')] = sprintf('gr_%s_upstream', short_code)
+            colnames(mcols(gr))[which(colnames(mcols(gr)) == 'gr_nkb_downstream')] = sprintf('gr_%s_downstream', short_code)
+
+        return(gr)
+    }
+
+################################################################################
+### A function to combine adjacent ranges belonging to the same gene_id so that
+### locus definitions have the minimum number of lines possible.
+################################################################################
+
+    reduce_gr = function(gr, eg2symbol) {
+        message('Splitting on gene_id into GRangesList...')
         tmp_grl = splitAsList(gr, gr$gene_id)
+
         message('Reducing within gene_id...')
-        tmp_grl = endoapply(tmp_grl, function(g){
-            tmp = reduce(g)
-            tmp$gene_id = unique(g$gene_id)
-            tmp$symbol = unique(g$symbol)
-            return(tmp)
-        })
+        tmp_grl = reduce(tmp_grl)
+
+        # Get the correct vector of the gene_id from the GRangesList
+        gene_id_rle = S4Vectors::Rle(names(tmp_grl), S4Vectors::elementNROWS(tmp_grl))
+        gene_id_vec = as.integer(gene_id_rle)
+
         message('Reconstructing GRanges...')
-        tmp_gr = unlist(tmp_grl, use.names = FALSE)
-        tmp_gr = sort(tmp_gr)
-        return(tmp_gr)
+        gr = unlist(tmp_grl, use.names = FALSE)
+
+        # Add back the gene_ids and symbols
+        message('Appending gene_id and symbol...')
+        mcols(gr)$gene_id = gene_id_vec
+        mcols(gr)$symbol = eg2symbol[match(mcols(gr)$gene_id, eg2symbol$gene_id), 'symbol']
+
+        gr = sort(gr)
+
+        return(gr)
     }
 
 ################################################################################
-### Setup objects
+################################################################################
 ################################################################################
 
-###
-### Establish databases
-###
-    # For the transcripts, TSSs, TESs, and Entrez Gene IDs
+################################################################################
+### Build nearest_tss definition
+################################################################################
+
+    build_ldef_nearest_tss = function(gr, eg2symbol) {
+        # Extract ntss
+        ldef = gr$nearest_tss
+
+        # Add gene_id and symbols
+        ldef$gene_id = gr$gene_id
+        ldef$symbol = gr$symbol
+
+        # Inherit seqinfo()
+        seqinfo(ldef) = seqinfo(gr)
+
+        # Remove strand information
+        strand(ldef) = '*'
+
+        # Sort and unique
+        ldef = sort(ldef)
+        ldef = unique(ldef)
+
+        # Reduce
+        ldef = reduce_gr(ldef, eg2symbol)
+
+        return(ldef)
+    }
+
+################################################################################
+### Build nearest_gene definition
+################################################################################
+
+    build_ldef_nearest_gene = function(gr, eg2symbol) {
+        ### Create the nearest_gene definition by concatenating the GRanges consisting of:
+        ### [gr$precede_left, start(gr)] and [start(gr), gr$follow_left]
+        ### [gr$precede_right, end(gr)] and [end(gr), gr$follow_right]
+        ### In other words, we are expanding around each transcript's left and right ends,
+        ### ranges up until the preceding and following. There will initially be some
+        ### redundancy that will be fixed with reduce() in a GRangesList on the gene_id.
+
+        # Build the nearest_gene definition
+        ldef = c(
+            GRanges(
+                seqnames = seqnames(gr),
+                ranges = IRanges(start = gr$ngene_left_start, end = gr$ngene_left_end),
+                strand = '*',
+                gene_id = gr$gene_id,
+                symbol = gr$symbol),
+            GRanges(
+                seqnames = seqnames(gr),
+                ranges = IRanges(start = gr$ngene_right_start, end = gr$ngene_right_end),
+                strand = '*',
+                gene_id = gr$gene_id,
+                symbol = gr$symbol)
+        )
+
+        # Enforce uniqueness of ranges/gene_id
+        ldef = sort(ldef)
+        ldef = unique(ldef)
+
+        # Reduce
+        ldef = reduce_gr(ldef, eg2symbol)
+
+        return(ldef)
+    }
+
+################################################################################
+### Build nkb related definition
+################################################################################
+
+    # @param width Is the width of the nkb definition, e.g. 1000, 5000, or 10000
+    # @param context Is one of inside, upstream, or outside
+    build_ldef_nkb = function(gr, width, context, eg2symbol) {
+        # Convert to *kb
+        if(width == 1000) {
+            short_width = '1kb'
+        } else if (width == 5000) {
+            short_width = '5kb'
+        } else if (width == 10000) {
+            short_width = '10kb'
+        }
+
+        # Build the expected column names for extraction from mcols()
+        if(context == 'inside') {
+            short_codes = sprintf('gr_%s', short_width)
+        } else if (context == 'upstream') {
+            short_codes = sprintf('gr_%s_upstream', short_width)
+        } else if (context == 'outside') {
+            short_codes = c(
+                sprintf('gr_%s_upstream', short_width),
+                sprintf('gr_%s_downstream', short_width))
+        }
+
+        # Determine which
+        mcols_idx =  colnames(mcols(gr)) %in% short_codes
+
+        ldef = mcols(gr)[, mcols_idx]
+
+        # If outside nkb, then concatenate the two resulting columns
+        # otherwise, ldef is already just a GRanges
+        if(context == 'outside') {
+            ldef = c(ldef[,1], ldef[,2])
+        }
+
+        # Force unstranded
+        strand(ldef) = '*'
+
+        # Only take regions with width > 1
+        ldef = ldef[which(width(ldef) > 1)]
+
+        # Enforce uniqueness of ranges/gene_id
+        ldef = sort(ldef)
+        ldef = unique(ldef)
+
+        # Reduce
+        ldef = reduce_gr(ldef, eg2symbol)
+
+        return(ldef)
+    }
+
+################################################################################
+### Build BED output
+################################################################################
+
+    ldef_gr_to_bed_file = function(ldef_gr, ldef_name) {
+        df = data.frame(ldef_gr, stringsAsFactors=F)
+        df$strand = '.'
+        df$score = 1000
+        df$name = paste(df$gene_id, df$symbol, sep=':')
+
+        df = df[,c('seqnames','start','end','name','score','strand')]
+        write.table(df, file = sprintf('data/%s.bed', ldef_name), sep='\t', quote = F, col.names=F, row.names=F)
+    }
+
+    old_ldef_to_bed_file = function(old_ldef, ldef_name) {
+        df = data.frame(old_ldef@granges, stringsAsFactors=F)
+        df$strand = '.'
+        df$score = 1000
+
+        df = df[,c('seqnames','start','end','names','score','strand')]
+        write.table(df, file = sprintf('data/%s.bed', ldef_name), sep='\t', quote = F, col.names=F, row.names=F)
+    }
+
+    ldef_gr_to_LocusDefinition = function(ldef_gr, genome, organism, ldef_name) {
+        object = new("LocusDefinition")
+
+        object@granges = ldef_gr
+        object@dframe = data.frame(ldef_gr)
+        object@genome.build = genome
+        object@organism = organism
+
+        save(object, file = sprintf('data/locusdef.%s.%s.RData', genome, ldef_name), compress = 'xz')
+    }
+
+################################################################################
+### MAIN
+################################################################################
+
+### Establish data sources for base of definitions
+    ### For the transcripts, TSSs, TESs, and Entrez Gene IDs
     txdb = TxDb.Hsapiens.UCSC.hg19.knownGene
 
     ### Entrez ID to gene symbol mapping
     orgdb = org.Hs.egSYMBOL
+
+### Establish data sources for filtering of definitions
+    ### GENCODE data for filtering types of transcripts
+    gencode_url = 'ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz'
+    mapping_url = 'ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz'
+
+    ### GENCODE annotations
+    # 'ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz'
+    gencode = readGFF(gencode_url)
+
+    ### ENSEMBL transcript ID to Entrez ID mapping
+    # 'ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz'
+    ens2eg = read_tsv(mapping_url, col_names = c('ens_id','gene_id'))
+
+### Build Entrez ID to gene symbol mapping
     # Get the gene symbol that are mapped to an entrez gene identifiers
     mapped_genes = mappedkeys(orgdb)
     # Convert to a data.frame
     eg2symbol = as.data.frame(orgdb[mapped_genes])
     eg2symbol$gene_id = as.integer(eg2symbol$gene_id)
 
-    ### GENCODE annotations
-    gencode = readGFF('ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz')
-
-    ### ENSEMBL transcript ID to Entrez ID mapping
-    ens2eg = read_tsv('ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz', col_names = c('ens_id','gene_id'))
-
-###
-### Filter for canonical chromosomes
-###
+### Filter txdb for canonical chromosomes
     seqs = seqlevels(txdb)
     seqs = seqs[!(grepl('gl',seqs) | grepl('hap',seqs))]
     seqlevels(txdb) = seqs
 
-###
-### Build GRanges of transcripts exons, and introns.
-### Remove those with NA gene_id and make unique according to location + gene_id.
-###
-    # Transcripts
-        gr = transcripts(txdb, columns=c('gene_id'))
-        gr$gene_id = as.integer(gr$gene_id)
-        gr$symbol = eg2symbol[match(gr$gene_id, eg2symbol$gene_id), 'symbol']
-
-    # Exons
-        grl_exons = exonsBy(txdb, by= 'tx', use.names = TRUE)
-        exons_txname_rle = Rle(names(grl_exons), elementNROWS(grl_exons))
-        exons_txname_vec = as.character(exons_txname_rle)
-
-        gr_exons = unlist(grl_exons, use.names = FALSE)
-        mcols(gr_exons)$tx_name = exons_txname_vec
-
-        # Add Entrez ID and symbol
-        # UCSC TXID and TXNAME to GENEID mapping (for introns and exons)
-        id_maps = AnnotationDbi::select(txdb, keys = names(grl_exons), columns = c('TXID','GENEID'), keytype = 'TXNAME')
-        mcols(gr_exons)$gene_id = id_maps[match(mcols(gr_exons)$tx_name, id_maps$TXNAME), 'GENEID']
-        mcols(gr_exons)$symbol = eg2symbol[match(mcols(gr_exons)$gene_id, eg2symbol$gene_id), 'symbol']
-        # Keep only gene_id and symbol in mcols
-        mcols(gr_exons) = mcols(gr_exons)[,c('gene_id','symbol')]
-
-    # Introns
-        grl_introns = intronsByTranscript(txdb, use.names = TRUE)
-        # Create Rle of the tx_names
-        introns_txname_rle = Rle(names(grl_introns), elementNROWS(grl_introns))
-        introns_txname_vec = as.character(introns_txname_rle)
-        # Unlist and add the tx_names
-        gr_introns = unlist(grl_introns, use.names = FALSE)
-        mcols(gr_introns)$tx_name = introns_txname_vec
-
-        # Add Entrez ID and symbol
-        # NOTE: here we match on the tx_name because the tx_id is not given
-        id_maps = AnnotationDbi::select(txdb, keys = names(grl_introns), columns = c('TXID','GENEID'), keytype = 'TXNAME')
-        mcols(gr_introns)$gene_id = id_maps[match(mcols(gr_introns)$tx_name, id_maps$TXNAME), 'GENEID']
-        mcols(gr_introns)$symbol = eg2symbol[match(mcols(gr_introns)$gene_id, eg2symbol$gene_id), 'symbol']
-        # Keep only gene_id and symbol in mcols
-        mcols(gr_introns) = mcols(gr_introns)[,c('gene_id','symbol')]
-
-    # Force the gene_id to integer from CharacterList
-    # NOTE: Worth a check that mean(sapply(gr$gene_id, length)) = 1
-    # so we're sure a transcript doesn't have multiple gene_ids.
-        gr_exons$gene_id = as.integer(gr_exons$gene_id)
-        gr_introns$gene_id = as.integer(gr_introns$gene_id)
-
-    # Force the range to have a gene_id
-    # Can't do chipenrich without it
-        gr = gr[!is.na(gr$gene_id)]
-        gr_exons = gr_exons[!is.na(gr_exons$gene_id)]
-        gr_introns = gr_introns[!is.na(gr_introns$gene_id)]
-
-    # Enforce uniqueness on location + gene_id
-        gr = unique(gr)
-        gr_exons = unique(gr_exons)
-        gr_introns = unique(gr_introns)
-
-        gr = sort(gr)
-        gr_exons = sort(gr_exons)
-        gr_introns = sort(gr_introns)
-
-###
-### FILTER OUT certain categories from GENCODE and based on symbol
-###
-    # gene_type codes from GENCODE to filter out
-    filter_gencode_types = c('3prime_overlapping_ncRNA', 'scRNA', 'snoRNA', 'snRNA', 'scaRNA')
-
-    filter_types_ensembl_ids = unique(unlist(subset(gencode, gene_type %in% filter_gencode_types)$Parent, use.names = FALSE))
-
-    # Filter gene_name with -AS for antisense
-    filter_AS_ensembl_ids = unique(unlist(gencode[grepl('-AS', gencode$gene_name), 'Parent'], use.names = FALSE))
-
-    # Combine
-    filter_ensembl_ids = c(filter_types_ensembl_ids, filter_AS_ensembl_ids)
-
-    # Get the Entrez IDs to use in gr, gr_exons, and gr_introns
-    filter_entrez_ids = unique(unlist(subset(ens2eg, ens_id %in% filter_ensembl_ids)$gene_id, use.names = FALSE))
-
-    # Filter from gr, gr_exons, and gr_introns
-    gr = gr[!(gr$gene_id %in% filter_entrez_ids)]
-    gr_exons = gr_exons[!(gr_exons$gene_id %in% filter_entrez_ids)]
-    gr_introns = gr_introns[!(gr_introns$gene_id %in% filter_entrez_ids)]
-
-    # Filter from gr, gr_exons, and gr_introns those with symbols beginning with LOC
-    gr = gr[!grepl('^LOC', gr$symbol)]
-    gr_exons = gr_exons[!grepl('^LOC', gr_exons$symbol)]
-    gr_introns = gr_introns[!grepl('^LOC', gr_introns$symbol)]
-
-###
-### Establish correct TSS and TES for each transcript according to strand.
-### i.e. TSS = (start && +) && (end && -) and TES = (end && -) && (start && +)
-### NOTE: Important for all the definitions.
-###
-
-    pos_idx = which(strand(gr) == '+')
-    neg_idx = which(strand(gr) == '-')
-
-    mcols(gr)$tss = 0
-    mcols(gr[pos_idx])$tss = start(gr)[pos_idx]
-    mcols(gr[neg_idx])$tss = end(gr)[neg_idx]
-
-    mcols(gr)$tes = 0
-    mcols(gr[pos_idx])$tes = end(gr)[pos_idx]
-    mcols(gr[neg_idx])$tes = start(gr)[neg_idx]
-
-    mcols(gr)$gr_tss = GRanges(
-        seqnames = seqnames(gr),
-        ranges = IRanges(start = gr$tss, end = gr$tss),
-        strand = strand(gr),
-        seqinfo = seqinfo(gr))
-
-    mcols(gr)$gr_tes = GRanges(
-        seqnames = seqnames(gr),
-        ranges = IRanges(start = gr$tes, end = gr$tes),
-        strand = strand(gr),
-        seqinfo = seqinfo(gr))
-
-###
-### Establish left and right boundaries for each transcript
-### NOTE: Important for nearets_gene definition.
-###
-
-    mcols(gr)$gr_left = GRanges(
-        seqnames = seqnames(gr),
-        ranges = IRanges(start = start(gr), end = start(gr)),
-        strand = strand(gr),
-        seqinfo = seqinfo(gr))
-
-    mcols(gr)$gr_right = GRanges(
-        seqnames = seqnames(gr),
-        ranges = IRanges(start = end(gr), end = end(gr)),
-        strand = strand(gr),
-        seqinfo = seqinfo(gr))
-
-###
-### Establish nkb flanks around TSSs for each transcript
-###
-
-    # 1kb
-    mcols(gr)$onekb = flank(
-        x = gr$gr_tss,
-        width = 1000,
-        both = TRUE,
-        use.names = FALSE,
-        ignore.strand = TRUE)
-
-    # 5kb
-    mcols(gr)$fivekb = flank(
-        x = gr$gr_tss,
-        width = 5000,
-        both = TRUE,
-        use.names = FALSE,
-        ignore.strand = TRUE)
-
-    # 10kb
-    mcols(gr)$tenkb = flank(
-        x = gr$gr_tss,
-        width = 10000,
-        both = TRUE,
-        use.names = FALSE,
-        ignore.strand = TRUE)
-
 ################################################################################
-### Build intermediate boundaries as GRanges to construct locus definitions
+### Build up gr_transcripts for nearest_tss, nearest_gene, and all nkb definitions
 ################################################################################
 
-### In all that follows X is the object of interest and v is the object chosen
-### by the procedure called. [ and ] denote TSSs and TESs and - is intergenic space.
+    gr_transcripts = build_transcript_gr(txdb, eg2symbol)
+    gr_transcripts = filter_gencode_types(gr = gr_transcripts, gencode = gencode, ens2eg = ens2eg)
+    gr_transcripts = filter_readthrough_transcripts(gr = gr_transcripts, egGENENAME = org.Hs.egGENENAME)
+
+    gr_transcripts = add_ntss_precursors(gr_transcripts)
+    gr_transcripts = add_ngene_precursors(gr_transcripts)
+
+    gr_transcripts = add_nkb_precursors(gr_transcripts, width = 1000)
+    gr_transcripts = add_nkb_precursors(gr_transcripts, width = 5000)
+    gr_transcripts = add_nkb_precursors(gr_transcripts, width = 10000)
 
 ################################################################################
-### Determine following and preceding TSSs relative to all TSSs
+### Build up gr_exons and gr_introns for exon and intron definitions
+################################################################################
 
-###
-### Determine TSSs following TSSs
-###                        X                 v
-### ------tss-------------TSS---------------tss------tss--------tsss
-    gr$tss_follow_tss = subject_following_x(gr$gr_tss, gr$gr_tss)
+    gr_exons = build_exons_introns_gr(txdb, eg2symbol, type='exons')
+    gr_exons = filter_gencode_types(gr = gr_exons, gencode = gencode, ens2eg = ens2eg)
+    gr_exons = filter_readthrough_transcripts(gr = gr_exons, egGENENAME = org.Hs.egGENENAME)
 
-###
-### Determine TSSs preceding TSSs
-###        v               X
-### ------tss-------------TSS---------------tss------tss--------tsss
-    gr$tss_precede_tss = subject_preceding_x(gr$gr_tss, gr$gr_tss)
+    gr_exons = reduce_gr(gr_exons, eg2symbol)
+
+
+    gr_introns = build_exons_introns_gr(txdb, eg2symbol, type='introns')
+    gr_introns = filter_gencode_types(gr = gr_introns, gencode = gencode, ens2eg = ens2eg)
+    gr_introns = filter_readthrough_transcripts(gr = gr_introns, egGENENAME = org.Hs.egGENENAME)
+
+    gr_introns = reduce_gr(gr_introns, eg2symbol)
 
 ################################################################################
-### Determine following and preceding left and right ends of transcripts for
-### right ends of transcripts.
-
-###
-### Determine right preceding right
-###            v                       X
-### -----[     ]--------------[        ]------------[       ]------------
-###
-###                                v    X
-### -----[     ]--------[     [    ]    ]------------[       ]------------
-    gr$right_precede_right = subject_preceding_x(gr$gr_right, gr$gr_right)
-
-    # Get the distance
-    gr$dist_right_precede_right = distance(gr$gr_right, gr$right_precede_right, ignore.strand = TRUE)
-
-###
-### Determine left preceding right
-###            v                       X
-### -----[     ]--------------[        ]------------[       ]------------
-###
-###                           v         X
-### -----[     ]--------[     [    ]    ]------------[       ]------------
-    gr$left_precede_right = subject_preceding_x(gr$gr_right, gr$gr_left)
-
-    # Get the distance
-    gr$dist_left_precede_right = distance(gr$gr_right, gr$left_precede_right, ignore.strand = TRUE)
-
-###
-### Decide whether preceding left or preceding right precedes right based on minimum distance
-###                           v
-###            pr             pl       X
-### -----[     ]--------------[        ]------------[       ]------------
-###                                v
-###                           pl   pr   X
-### -----[     ]--------[     [    ]    ]------------[       ]------------
-
-    # Start by making the right the winner
-    gr$precede_right = gr$right_precede_right
-
-    # Get the indices where left is closer than right
-    precede_right_left_closer_idx = which(gr$dist_right_precede_right > gr$dist_left_precede_right)
-    # Replace gr$precede_right with the left where the preceding left is closer than the preceding right
-    gr$precede_right[precede_right_left_closer_idx] = gr$left_precede_right[precede_right_left_closer_idx]
-
-######
-### NOTE: Cartoons for the other combinations are ommitted, but you get the idea.
-
-###
-### Determine right following right
-###
-    gr$right_follow_right = subject_following_x(gr$gr_right, gr$gr_right)
-
-    # Get the distance
-    gr$dist_right_follow_right = distance(gr$gr_right, gr$right_follow_right, ignore.strand = TRUE)
-
-###
-### Determine left following right
-###
-    gr$left_follow_right = subject_following_x(gr$gr_right, gr$gr_left)
-
-    # Get the distance
-    gr$dist_left_follow_right = distance(gr$gr_right, gr$left_follow_right, ignore.strand = TRUE)
-
-###
-### Decide whether following right or following left follows right based on minimum distance
-###
-    # Start by making the right the winner
-    gr$follow_right = gr$right_follow_right
-
-    # Get the indices where left is closer than right
-    follow_right_left_closer_idx = which(gr$dist_right_follow_right > gr$dist_left_follow_right)
-    # Replace gr$follow_right with the left where the following left is closer than the following right
-    gr$follow_right[follow_right_left_closer_idx] = gr$left_follow_right[follow_right_left_closer_idx]
-
+### Examine coverage of exons and introns
 ################################################################################
-### Determine following and preceding left and right ends of transcripts for
-### left ends of transcripts.
 
-###
-### Determine right preceding left
-###
-    gr$right_precede_left = subject_preceding_x(gr$gr_left, gr$gr_right)
+    cov_exons = GenomicRanges::coverage(gr_exons)
+    all_cov_exons = c()
+    for(chr in names(cov_exons)) {
+        all_cov_exons = c(all_cov_exons, cov_exons[[chr]]@values)
+    }
+    table(all_cov_exons)
 
-    # Get the distance
-    gr$dist_right_precede_left = distance(gr$gr_left, gr$right_precede_left, ignore.strand = TRUE)
-
-###
-### Determine left preceding left
-###
-    gr$left_precede_left = subject_preceding_x(gr$gr_left, gr$gr_left)
-
-    # Get the distance
-    gr$dist_left_precede_left = distance(gr$gr_left, gr$left_precede_left, ignore.strand = TRUE)
-
-###
-### Decide whether preceding right or preceding left precedes left based on minimum distance
-###
-    # Start by making the right the winner
-    gr$precede_left = gr$right_precede_left
-
-    # Get the indices where left is closer than right
-    precede_left_left_closer_idx = which(gr$dist_right_precede_left > gr$dist_left_precede_left)
-    # Replace gr$precede_left with the left where the preceding left is closer than the preceding right
-    gr$precede_left[precede_left_left_closer_idx] = gr$left_precede_left[precede_left_left_closer_idx]
-
-######
-
-###
-### Determine right following left
-###
-    gr$right_follow_left = subject_following_x(gr$gr_left, gr$gr_right)
-
-    # Get the distance
-    gr$dist_right_follow_left = distance(gr$gr_left, gr$right_follow_left, ignore.strand = TRUE)
-
-###
-### Determine left following left
-###
-    gr$left_follow_left = subject_following_x(gr$gr_left, gr$gr_left)
-
-    # Get the distance
-    gr$dist_left_follow_left = distance(gr$gr_left, gr$left_follow_left, ignore.strand = TRUE)
-
-###
-### Decide whether following right or following left follows left based on minimum distance
-###
-    # Start by making the right the winner
-    gr$follow_left = gr$right_follow_left
-
-    # Get the indices where left is closer than right
-    follow_left_left_closer_idx = which(gr$dist_right_follow_left > gr$dist_left_follow_left)
-    # Replace gr$follow_left with the left where the following left is closer than the following right
-    gr$follow_left[follow_left_left_closer_idx] = gr$left_follow_left[follow_left_left_closer_idx]
-
-################################################################################
-### Determine boundaries of nearest_tss definitions. Essentially, midpoints btw TSSs
-
-    # Setup IRanges from which to take the midpoints for the nearest_tss boundaries
-    gr$ntss_start_range = IRanges(start = start(gr$tss_precede_tss), end = start(gr$gr_tss))
-    gr$ntss_end_range = IRanges(start = start(gr$gr_tss), end = start(gr$tss_follow_tss))
-
-    # The nearest_tss boundaries are the midpoints between nearest TSSs on either side
-    # of the TSS of interest.
-    gr$ntss_start = mid(gr$ntss_start_range) + 1
-    gr$ntss_end = mid(gr$ntss_end_range)
+    cov_introns = GenomicRanges::coverage(gr_introns)
+    all_cov_introns = c()
+    for(chr in names(cov_introns)) {
+        all_cov_introns = c(all_cov_introns, cov_introns[[chr]]@values)
+    }
+    table(all_cov_introns)
 
 ################################################################################
 ### Build locus definitions
 ################################################################################
 
-################################################################################
-### Create the nearest_tss definition by using the midpoints of:
-### [gr$tss_precede_tss, start(gr$gr_tss)] and [start(gr$gr_tss), gr$tss_follow_tss]
-### as the start and endpoints of the nearest_tss range.
+### nearest_tss
+    message('Constructing nearest_tss ldef...')
+    ldef_ntss = build_ldef_nearest_tss(gr_transcripts, eg2symbol)
 
-    # Build the nearest_tss definition
-    gr_nearest_tss = GRanges(
-        seqnames = seqnames(gr),
-        ranges = IRanges(start = gr$ntss_start, end = gr$ntss_end),
-        strand = '*',
-        gene_id = gr$gene_id,
-        symbol = gr$symbol)
+### nearest_gene
+    message('Constructing nearest_gene ldef...')
+    ldef_ngene = build_ldef_nearest_gene(gr_transcripts, eg2symbol)
 
-    gr$nearest_tss = granges(gr_nearest_tss)
+### exons
+    message('Constructing exon ldef...')
+    ldef_exons = gr_exons
 
-    # Enforce uniqueness of ranges/gene_id
-    gr_nearest_tss = sort(gr_nearest_tss)
-    gr_nearest_tss = unique(gr_nearest_tss)
+### introns
+    message('Constructing intron ldef...')
+    ldef_introns = gr_introns
 
-################################################################################
-### Create the nearest_gene definition by concatenating the GRanges consisting of:
-### [gr$precede_left, start(gr)] and [start(gr), gr$follow_left]
-### [gr$precede_right, end(gr)] and [end(gr), gr$follow_right]
-### In other words, we are expanding around each transcript's left and right ends,
-### ranges up until the preceding and following. There will initially be some
-### redundancy that will be fixed with reduce() in a GRangesList on the gene_id.
+### 1kb related definitions
+    message('Constructing <1kb ldef...')
+    ldef_1kb = build_ldef_nkb(gr_transcripts, width = 1000, context = 'inside', eg2symbol = eg2symbol)
+    message('Constructing >1kb upstream ldef...')
+    ldef_1kb_upstream = build_ldef_nkb(gr_transcripts, width = 1000, context = 'upstream', eg2symbol = eg2symbol)
+    message('Constructing >1kb ldef...')
+    ldef_1kb_outside = build_ldef_nkb(gr_transcripts, width = 1000, context = 'outside', eg2symbol = eg2symbol)
 
-    # Setup IRanges from which to take the midpoints for the nearest_gene boundaries
-    gr$ngene_left_start_range = IRanges(start = start(gr$precede_left), end = start(gr))
-    gr$ngene_left_end_range = IRanges(start = start(gr), end = start(gr$follow_left))
+### 5kb related definitions
+    message('Constructing <5kb ldef...')
+    ldef_5kb = build_ldef_nkb(gr_transcripts, width = 5000, context = 'inside', eg2symbol = eg2symbol)
+        message('Constructing >5kb upstream ldef...')
+    ldef_5kb_upstream = build_ldef_nkb(gr_transcripts, width = 5000, context = 'upstream', eg2symbol = eg2symbol)
+        message('Constructing >5kb ldef...')
+    ldef_5kb_outside = build_ldef_nkb(gr_transcripts, width = 5000, context = 'outside', eg2symbol = eg2symbol)
 
-    gr$ngene_right_start_range = IRanges(start = start(gr$precede_right), end = end(gr))
-    gr$ngene_right_end_range = IRanges(start = end(gr), end = start(gr$follow_right))
-
-    # The nearest_gene boundaries are defined as the midpoints between the left
-    # end of the range and the closest preceding TSS or TES and the right end of the
-    # range and the closest following TSS or TES.
-    gr$ngene_left_start = mid(gr$ngene_left_start_range) + 1
-    gr$ngene_left_end = mid(gr$ngene_left_end_range)
-
-    gr$ngene_right_start = mid(gr$ngene_right_start_range) + 1
-    gr$ngene_right_end = mid(gr$ngene_right_end_range)
-
-    # Build the nearest_gene definition
-    gr_nearest_gene = c(
-        GRanges(
-            seqnames = seqnames(gr),
-            ranges = IRanges(start = gr$ngene_left_start, end = gr$ngene_left_end),
-            strand = '*',
-            gene_id = gr$gene_id,
-            symbol = gr$symbol),
-        GRanges(
-            seqnames = seqnames(gr),
-            ranges = IRanges(start = gr$ngene_right_start, end = gr$ngene_right_end),
-            strand = '*',
-            gene_id = gr$gene_id,
-            symbol = gr$symbol)
-    )
-
-    # Enforce uniqueness of ranges/gene_id
-    gr_nearest_gene = sort(gr_nearest_gene)
-    gr_nearest_gene = unique(gr_nearest_gene)
+### 10kb related definitions
+    message('Constructing <10kb ldef...')
+    ldef_10kb = build_ldef_nkb(gr_transcripts, width = 10000, context = 'inside', eg2symbol = eg2symbol)
+        message('Constructing >10kb upstream ldef...')
+    ldef_10kb_upstream = build_ldef_nkb(gr_transcripts, width = 10000, context = 'upstream', eg2symbol = eg2symbol)
+        message('Constructing >10kb ldef...')
+    ldef_10kb_outside = build_ldef_nkb(gr_transcripts, width = 10000, context = 'outside', eg2symbol = eg2symbol)
 
 ################################################################################
-
-### Create 1kb definition by determining if the 1kb start or end exceeds
-### ntss_start and ntss_end, respectively.
-    onekb_start_less_ntss_start_idx = which(start(gr$onekb) < gr$ntss_start)
-    onekb_end_greater_ntss_end_idx = which(end(gr$onekb) > gr$ntss_end)
-
-    # Fix the 1kb ranges that go too far
-    gr$onekb_fix = gr$onekb
-    start(gr$onekb_fix)[onekb_start_less_ntss_start_idx] = gr$ntss_start[onekb_start_less_ntss_start_idx]
-    end(gr$onekb_fix)[onekb_end_greater_ntss_end_idx] = gr$ntss_end[onekb_end_greater_ntss_end_idx]
-
-    # Create the 1kb definition
-    gr_onekb = gr$onekb_fix
-    strand(gr_onekb) = '*'
-    mcols(gr_onekb) = mcols(gr)[,c('gene_id','symbol')]
-
-    gr_onekb = sort(gr_onekb)
-    gr_onekb = unique(gr_onekb)
-
+### Construct LocusDefinition class objects for each
 ################################################################################
 
-### Create 5kb definition by determining if the 5kb start or end exceeds
-### ntss_start and ntss_end, respectively.
-    fivekb_start_less_ntss_start_idx = which(start(gr$fivekb) < gr$ntss_start)
-    fivekb_end_greater_ntss_end_idx = which(end(gr$fivekb) > gr$ntss_end)
+genome = 'hg19'
+organism = 'Homo Sapiens'
 
-    # Fix the 5kb ranges that go too far
-    gr$fivekb_fix = gr$fivekb
-    start(gr$fivekb_fix)[fivekb_start_less_ntss_start_idx] = gr$ntss_start[fivekb_start_less_ntss_start_idx]
-    end(gr$fivekb_fix)[fivekb_end_greater_ntss_end_idx] = gr$ntss_end[fivekb_end_greater_ntss_end_idx]
+    ldef_gr_to_LocusDefinition(ldef_gr = ldef_ntss, genome = genome, organism = organism, ldef_name = 'nearest_tss')
+    ldef_gr_to_LocusDefinition(ldef_gr = ldef_ngene, genome = genome, organism = organism, ldef_name = 'nearest_gene')
 
-    ### Create the 5kb definition
-    gr_fivekb = gr$fivekb_fix
-    strand(gr_fivekb) = '*'
-    mcols(gr_fivekb) = mcols(gr)[,c('gene_id','symbol')]
+    ldef_gr_to_LocusDefinition(ldef_gr = ldef_exons, genome = genome, organism = organism, ldef_name = 'exon')
+    ldef_gr_to_LocusDefinition(ldef_gr = ldef_introns, genome = genome, organism = organism, ldef_name = 'intron')
 
-    gr_fivekb = sort(gr_fivekb)
-    gr_fivekb = unique(gr_fivekb)
+    ldef_gr_to_LocusDefinition(ldef_gr = ldef_1kb, genome = genome, organism = organism, ldef_name = '1kb')
+    ldef_gr_to_LocusDefinition(ldef_gr = ldef_1kb_upstream, genome = genome, organism = organism, ldef_name = '1kb_outside_upstream')
+    ldef_gr_to_LocusDefinition(ldef_gr = ldef_1kb_outside, genome = genome, organism = organism, ldef_name = '1kb_outside')
 
-################################################################################
+    ldef_gr_to_LocusDefinition(ldef_gr = ldef_5kb, genome = genome, organism = organism, ldef_name = '5kb')
+    ldef_gr_to_LocusDefinition(ldef_gr = ldef_5kb_upstream, genome = genome, organism = organism, ldef_name = '5kb_outside_upstream')
+    ldef_gr_to_LocusDefinition(ldef_gr = ldef_5kb_outside, genome = genome, organism = organism, ldef_name = '5kb_outside')
 
-### Create 10kb definition by determining if the 10kb start or end exceeds
-### ntss_start and ntss_end, respectively.
-    tenkb_start_less_ntss_start_idx = which(start(gr$tenkb) < gr$ntss_start)
-    tenkb_end_greater_ntss_end_idx = which(end(gr$tenkb) > gr$ntss_end)
-
-    # Fix the 10kb ranges that go too far
-    gr$tenkb_fix = gr$tenkb
-    start(gr$tenkb_fix)[tenkb_start_less_ntss_start_idx] = gr$ntss_start[tenkb_start_less_ntss_start_idx]
-    end(gr$tenkb_fix)[tenkb_end_greater_ntss_end_idx] = gr$ntss_end[tenkb_end_greater_ntss_end_idx]
-
-    ### Create a simple 10kb definition
-    gr_tenkb = gr$tenkb_fix
-    strand(gr_tenkb) = '*'
-    mcols(gr_tenkb) = mcols(gr)[,c('gene_id','symbol')]
-
-    gr_tenkb = sort(gr_tenkb)
-    gr_tenkb = unique(gr_tenkb)
+    ldef_gr_to_LocusDefinition(ldef_gr = ldef_10kb, genome = genome, organism = organism, ldef_name = '10kb')
+    ldef_gr_to_LocusDefinition(ldef_gr = ldef_10kb_upstream, genome = genome, organism = organism, ldef_name = '10kb_outside_upstream')
+    ldef_gr_to_LocusDefinition(ldef_gr = ldef_10kb_outside, genome = genome, organism = organism, ldef_name = '10kb_outside')
 
 ################################################################################
-### Create the outside nkb definitions
-
-###
-### 1kb
-###
-    # Use restrict to get left and right side of 1kb def up to nearest_tss
-    gr$outside_onekb_left = restrict(gr$nearest_tss, start = start(gr$nearest_tss), end = start(gr$onekb_fix))
-    gr$outside_onekb_right = restrict(gr$nearest_tss, start = end(gr$onekb_fix), end = end(gr$nearest_tss))
-
-    # Determine upstream ranges based on the strand
-    gr_onekb_upstream_pos = gr$outside_onekb_left[strand(gr) == '+']
-    mcols(gr_onekb_upstream_pos) = mcols(gr)[strand(gr) == '+', c('gene_id','symbol')]
-
-    gr_onekb_upstream_neg = gr$outside_onekb_right[strand(gr) == '-']
-    mcols(gr_onekb_upstream_neg) = mcols(gr)[strand(gr) == '-', c('gene_id','symbol')]
-
-    # Determine downstream ranges based on the strand
-    gr_onekb_downstream_pos = gr$outside_onekb_right[strand(gr) == '+']
-    mcols(gr_onekb_downstream_pos) = mcols(gr)[strand(gr) == '+', c('gene_id','symbol')]
-
-    gr_onekb_downstream_neg = gr$outside_onekb_left[strand(gr) == '-']
-    mcols(gr_onekb_downstream_neg) = mcols(gr)[strand(gr) == '-', c('gene_id','symbol')]
-
-    ### Create the >1kb upstream definition
-        gr_onekb_upstream = c(gr_onekb_upstream_pos, gr_onekb_upstream_neg)
-        gr_onekb_upstream = gr_onekb_upstream[which(width(gr_onekb_upstream) > 1)]
-
-        gr_onekb_upstream = sort(gr_onekb_upstream)
-        gr_onekb_upstream = unique(gr_onekb_upstream)
-
-    ### Create the outside 1kb definition
-    # Just need to create downstream and add it to the upstream
-        gr_onekb_downstream = c(gr_onekb_downstream_pos, gr_onekb_downstream_neg)
-        gr_onekb_downstream = gr_onekb_downstream[which(width(gr_onekb_downstream) > 1)]
-
-        gr_onekb_outside = c(gr_onekb_upstream, gr_onekb_downstream)
-        gr_onekb_outside = sort(gr_onekb_outside)
-        gr_onekb_outside = unique(gr_onekb_outside)
-
-###
-### 5kb
-###
-    # Use restrict to get left and right side of 1kb def up to nearest_tss
-    gr$outside_fivekb_left = restrict(gr$nearest_tss, start = start(gr$nearest_tss), end = start(gr$fivekb_fix))
-    gr$outside_fivekb_right = restrict(gr$nearest_tss, start = end(gr$fivekb_fix), end = end(gr$nearest_tss))
-
-    # Determine upstream ranges based on the strand
-    gr_fivekb_upstream_pos = gr$outside_fivekb_left[strand(gr) == '+']
-    mcols(gr_fivekb_upstream_pos) = mcols(gr)[strand(gr) == '+', c('gene_id','symbol')]
-
-    gr_fivekb_upstream_neg = gr$outside_fivekb_right[strand(gr) == '-']
-    mcols(gr_fivekb_upstream_neg) = mcols(gr)[strand(gr) == '-', c('gene_id','symbol')]
-
-    # Determine downstream ranges based on the strand
-    gr_fivekb_downstream_pos = gr$outside_fivekb_right[strand(gr) == '+']
-    mcols(gr_fivekb_downstream_pos) = mcols(gr)[strand(gr) == '+', c('gene_id','symbol')]
-
-    gr_fivekb_downstream_neg = gr$outside_fivekb_left[strand(gr) == '-']
-    mcols(gr_fivekb_downstream_neg) = mcols(gr)[strand(gr) == '-', c('gene_id','symbol')]
-
-    ### Create the >1kb upstream definition
-        gr_fivekb_upstream = c(gr_fivekb_upstream_pos, gr_fivekb_upstream_neg)
-        gr_fivekb_upstream = gr_fivekb_upstream[which(width(gr_fivekb_upstream) > 1)]
-
-        gr_fivekb_upstream = sort(gr_fivekb_upstream)
-        gr_fivekb_upstream = unique(gr_fivekb_upstream)
-
-    ### Create the outside 1kb definition
-    # Just need to create downstream and add it to the upstream
-        gr_fivekb_downstream = c(gr_fivekb_downstream_pos, gr_fivekb_downstream_neg)
-        gr_fivekb_downstream = gr_fivekb_downstream[which(width(gr_fivekb_downstream) > 1)]
-
-        gr_fivekb_outside = c(gr_fivekb_upstream, gr_fivekb_downstream)
-        gr_fivekb_outside = sort(gr_fivekb_outside)
-        gr_fivekb_outside = unique(gr_fivekb_outside)
-
-###
-### 10kb
-###
-    # Use restrict to get left and right side of 1kb def up to nearest_tss
-    gr$outside_tenkb_left = restrict(gr$nearest_tss, start = start(gr$nearest_tss), end = start(gr$tenkb_fix))
-    gr$outside_tenkb_right = restrict(gr$nearest_tss, start = end(gr$tenkb_fix), end = end(gr$nearest_tss))
-
-    # Determine upstream ranges based on the strand
-    gr_tenkb_upstream_pos = gr$outside_tenkb_left[strand(gr) == '+']
-    mcols(gr_tenkb_upstream_pos) = mcols(gr)[strand(gr) == '+', c('gene_id','symbol')]
-
-    gr_tenkb_upstream_neg = gr$outside_tenkb_right[strand(gr) == '-']
-    mcols(gr_tenkb_upstream_neg) = mcols(gr)[strand(gr) == '-', c('gene_id','symbol')]
-
-    # Determine downstream ranges based on the strand
-    gr_tenkb_downstream_pos = gr$outside_tenkb_right[strand(gr) == '+']
-    mcols(gr_tenkb_downstream_pos) = mcols(gr)[strand(gr) == '+', c('gene_id','symbol')]
-
-    gr_tenkb_downstream_neg = gr$outside_tenkb_left[strand(gr) == '-']
-    mcols(gr_tenkb_downstream_neg) = mcols(gr)[strand(gr) == '-', c('gene_id','symbol')]
-
-    ### Create the >1kb upstream definition
-        gr_tenkb_upstream = c(gr_tenkb_upstream_pos, gr_tenkb_upstream_neg)
-        gr_tenkb_upstream = gr_tenkb_upstream[which(width(gr_tenkb_upstream) > 1)]
-
-        gr_tenkb_upstream = sort(gr_tenkb_upstream)
-        gr_tenkb_upstream = unique(gr_tenkb_upstream)
-
-    ### Create the outside 1kb definition
-    # Just need to create downstream and add it to the upstream
-        gr_tenkb_downstream = c(gr_tenkb_downstream_pos, gr_tenkb_downstream_neg)
-        gr_tenkb_downstream = gr_tenkb_downstream[which(width(gr_tenkb_downstream) > 1)]
-
-        gr_tenkb_outside = c(gr_tenkb_upstream, gr_tenkb_downstream)
-        gr_tenkb_outside = sort(gr_tenkb_outside)
-        gr_tenkb_outside = unique(gr_tenkb_outside)
-
-################################################################################
-
-### Reduce all definitions
-
-message('Building nearest_tss (1/13)...')
-gr_nearest_tss = reduce_gr(gr_nearest_tss)
-
-message('Building nearest_gene (2/13)...')
-gr_nearest_gene = reduce_gr(gr_nearest_gene)
-
-message('Building exons (3/13)...')
-gr_exons = reduce_gr(gr_exons)
-
-message('Building introns (4/13)...')
-gr_introns = reduce_gr(gr_introns)
-
-message('Building <1kb (5/13)...')
-gr_onekb = reduce_gr(gr_onekb)
-
-message('Building <5kb (6/13)...')
-gr_fivekb = reduce_gr(gr_fivekb)
-
-message('Building <10kb (7/13)...')
-gr_tenkb = reduce_gr(gr_tenkb)
-
-message('Building >1kb upstream (8/13)...')
-gr_onekb_upstream = reduce_gr(gr_onekb_upstream)
-
-message('Building >5kb upstream (9/13)...')
-gr_fivekb_upstream = reduce_gr(gr_fivekb_upstream)
-
-message('Building >10kb upstream (10/13)...')
-gr_tenkb_upstream = reduce_gr(gr_tenkb_upstream)
-
-message('Building outside 1kb (11/13)...')
-gr_onekb_outside = reduce_gr(gr_onekb_outside)
-
-message('Building outside 5kb (12/13)...')
-gr_fivekb_outside = reduce_gr(gr_fivekb_outside)
-
-message('Building outside 10kb (13/13)...')
-gr_tenkb_outside = reduce_gr(gr_tenkb_outside)
-
-################################################################################
-
 ### Output for sanity checks in Genome Browser
-
-# ntss
-df_ntss = data.frame(gr_nearest_tss, stringsAsFactors=F)
-df_ntss$strand = '.'
-df_ntss$score = 1000
-
-df_ntss_symbol = df_ntss[,c('seqnames','start','end','symbol','score','strand')]
-write.table(df_ntss_symbol, file = '~/Desktop/postfilter/ntss_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
-
-df_ntss_geneid = df_ntss[,c('seqnames','start','end','gene_id','score','strand')]
-write.table(df_ntss_geneid, file = '~/Desktop/postfilter/ntss_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
-
-# ngene
-df_ngene = data.frame(gr_nearest_gene, stringsAsFactors=F)
-df_ngene$strand = '.'
-df_ngene$score = 1000
-
-df_ngene_symbol = df_ngene[,c('seqnames','start','end','symbol','score','strand')]
-write.table(df_ngene_symbol, file = '~/Desktop/postfilter/ngene_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
-
-df_ngene_geneid = df_ngene[,c('seqnames','start','end','gene_id','score','strand')]
-write.table(df_ngene_geneid, file = '~/Desktop/postfilter/ngene_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
-
-# exons
-df_exons = data.frame(gr_exons, stringsAsFactors=F)
-df_exons$strand = '.'
-df_exons$score = 1000
-
-df_exons_symbol = df_exons[,c('seqnames','start','end','symbol','score','strand')]
-write.table(df_exons_symbol, file = '~/Desktop/postfilter/exons_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
-
-df_exons_geneid = df_exons[,c('seqnames','start','end','gene_id','score','strand')]
-write.table(df_exons_geneid, file = '~/Desktop/postfilter/exons_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
-
-# introns
-df_introns = data.frame(gr_introns, stringsAsFactors=F)
-df_introns$strand = '.'
-df_introns$score = 1000
-
-df_introns_symbol = df_introns[,c('seqnames','start','end','symbol','score','strand')]
-write.table(df_introns_symbol, file = '~/Desktop/postfilter/introns_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
-
-df_introns_geneid = df_introns[,c('seqnames','start','end','gene_id','score','strand')]
-write.table(df_introns_geneid, file = '~/Desktop/postfilter/introns_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
-
-# onekb
-df_onekb = data.frame(gr_onekb, stringsAsFactors=F)
-df_onekb$strand = '.'
-df_onekb$score = 1000
-
-df_onekb_symbol = df_onekb[,c('seqnames','start','end','symbol','score','strand')]
-write.table(df_onekb_symbol, file = '~/Desktop/postfilter/onekb_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
-
-df_onekb_geneid = df_onekb[,c('seqnames','start','end','gene_id','score','strand')]
-write.table(df_onekb_geneid, file = '~/Desktop/postfilter/onekb_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
-
-# fivekb
-df_fivekb = data.frame(gr_fivekb, stringsAsFactors=F)
-df_fivekb$strand = '.'
-df_fivekb$score = 1000
-
-df_fivekb_symbol = df_fivekb[,c('seqnames','start','end','symbol','score','strand')]
-write.table(df_fivekb_symbol, file = '~/Desktop/postfilter/fivekb_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
-
-df_fivekb_geneid = df_fivekb[,c('seqnames','start','end','gene_id','score','strand')]
-write.table(df_fivekb_geneid, file = '~/Desktop/postfilter/fivekb_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
-
-# tenkb
-df_tenkb = data.frame(gr_tenkb, stringsAsFactors=F)
-df_tenkb$strand = '.'
-df_tenkb$score = 1000
-
-df_tenkb_symbol = df_tenkb[,c('seqnames','start','end','symbol','score','strand')]
-write.table(df_tenkb_symbol, file = '~/Desktop/postfilter/tenkb_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
-
-df_tenkb_geneid = df_tenkb[,c('seqnames','start','end','gene_id','score','strand')]
-write.table(df_tenkb_geneid, file = '~/Desktop/postfilter/tenkb_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
-
-# onekb_upstream
-df_onekb_upstream = data.frame(gr_onekb_upstream, stringsAsFactors=F)
-df_onekb_upstream$strand = '.'
-df_onekb_upstream$score = 1000
-
-df_onekb_upstream_symbol = df_onekb_upstream[,c('seqnames','start','end','symbol','score','strand')]
-write.table(df_onekb_upstream_symbol, file = '~/Desktop/postfilter/onekb_upstream_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
-
-df_onekb_upstream_geneid = df_onekb_upstream[,c('seqnames','start','end','gene_id','score','strand')]
-write.table(df_onekb_upstream_geneid, file = '~/Desktop/postfilter/onekb_upstream_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
-
-# fivekb_upstream
-df_fivekb_upstream = data.frame(gr_fivekb_upstream, stringsAsFactors=F)
-df_fivekb_upstream$strand = '.'
-df_fivekb_upstream$score = 1000
-
-df_fivekb_upstream_symbol = df_fivekb_upstream[,c('seqnames','start','end','symbol','score','strand')]
-write.table(df_fivekb_upstream_symbol, file = '~/Desktop/postfilter/fivekb_upstream_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
-
-df_fivekb_upstream_geneid = df_fivekb_upstream[,c('seqnames','start','end','gene_id','score','strand')]
-write.table(df_fivekb_upstream_geneid, file = '~/Desktop/postfilter/fivekb_upstream_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
-
-# tenkb_upstream
-df_tenkb_upstream = data.frame(gr_tenkb_upstream, stringsAsFactors=F)
-df_tenkb_upstream$strand = '.'
-df_tenkb_upstream$score = 1000
-
-df_tenkb_upstream_symbol = df_tenkb_upstream[,c('seqnames','start','end','symbol','score','strand')]
-write.table(df_tenkb_upstream_symbol, file = '~/Desktop/postfilter/tenkb_upstream_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
-
-df_tenkb_upstream_geneid = df_tenkb_upstream[,c('seqnames','start','end','gene_id','score','strand')]
-write.table(df_tenkb_upstream_geneid, file = '~/Desktop/postfilter/tenkb_upstream_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
-
-# onekb_outside
-df_onekb_outside = data.frame(gr_onekb_outside, stringsAsFactors=F)
-df_onekb_outside$strand = '.'
-df_onekb_outside$score = 1000
-
-df_onekb_outside_symbol = df_onekb_outside[,c('seqnames','start','end','symbol','score','strand')]
-write.table(df_onekb_outside_symbol, file = '~/Desktop/postfilter/onekb_outside_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
-
-df_onekb_outside_geneid = df_onekb_outside[,c('seqnames','start','end','gene_id','score','strand')]
-write.table(df_onekb_outside_geneid, file = '~/Desktop/postfilter/onekb_outside_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
-
-# fivekb_outside
-df_fivekb_outside = data.frame(gr_fivekb_outside, stringsAsFactors=F)
-df_fivekb_outside$strand = '.'
-df_fivekb_outside$score = 1000
-
-df_fivekb_outside_symbol = df_fivekb_outside[,c('seqnames','start','end','symbol','score','strand')]
-write.table(df_fivekb_outside_symbol, file = '~/Desktop/postfilter/fivekb_outside_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
-
-df_fivekb_outside_geneid = df_fivekb_outside[,c('seqnames','start','end','gene_id','score','strand')]
-write.table(df_fivekb_outside_geneid, file = '~/Desktop/postfilter/fivekb_outside_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
-
-# tenkb_outside
-df_tenkb_outside = data.frame(gr_tenkb_outside, stringsAsFactors=F)
-df_tenkb_outside$strand = '.'
-df_tenkb_outside$score = 1000
-
-df_tenkb_outside_symbol = df_tenkb_outside[,c('seqnames','start','end','symbol','score','strand')]
-write.table(df_tenkb_outside_symbol, file = '~/Desktop/postfilter/tenkb_outside_symbol.bed', sep='\t', quote = F, col.names=F, row.names=F)
-
-df_tenkb_outside_geneid = df_tenkb_outside[,c('seqnames','start','end','gene_id','score','strand')]
-write.table(df_tenkb_outside_geneid, file = '~/Desktop/postfilter/tenkb_outside_geneid.bed', sep='\t', quote = F, col.names=F, row.names=F)
-
 ################################################################################
 
-### Output old CE ldefs for sanity checks in Genome Browser
+### ldefs to bed files for checking
+    ldef_gr_to_bed_file(ldef_ntss, 'new_nearest_tss')
+    ldef_gr_to_bed_file(ldef_ngene, 'new_nearest_gene')
 
-library(chipenrich.data)
-data(locusdef.hg19.nearest_tss, package = 'chipenrich.data')
-data(locusdef.hg19.nearest_gene, package = 'chipenrich.data')
-data(locusdef.hg19.exon, package = 'chipenrich.data')
-data(locusdef.hg19.intron, package = 'chipenrich.data')
-data(locusdef.hg19.1kb, package = 'chipenrich.data')
-data(locusdef.hg19.5kb, package = 'chipenrich.data')
-data(locusdef.hg19.10kb, package = 'chipenrich.data')
-data(locusdef.hg19.10kb_and_more_upstream, package = 'chipenrich.data')
+    ldef_gr_to_bed_file(ldef_exons, 'new_exons')
+    ldef_gr_to_bed_file(ldef_introns, 'new_introns')
 
-ce_ntss = locusdef.hg19.nearest_tss@dframe
-ce_ntss$strand = '.'
-ce_ntss$score = 1000
-ce_ntss = ce_ntss[,c('chrom','start','end','geneid','score','strand')]
-write.table(ce_ntss, file = '~/Desktop/postfilter/ce_ntss.bed', sep='\t', quote = F, col.names=F, row.names=F)
+    ldef_gr_to_bed_file(ldef_1kb, 'new_1kb')
+    ldef_gr_to_bed_file(ldef_1kb_upstream, 'new_1kb_upstream')
+    ldef_gr_to_bed_file(ldef_1kb_outside, 'new_1kb_outside')
 
-ce_ngene = locusdef.hg19.nearest_gene@dframe
-ce_ngene$strand = '.'
-ce_ngene$score = 1000
-ce_ngene = ce_ngene[,c('chrom','start','end','geneid','score','strand')]
-write.table(ce_ngene, file = '~/Desktop/postfilter/ce_ngene.bed', sep='\t', quote = F, col.names=F, row.names=F)
+    ldef_gr_to_bed_file(ldef_5kb, 'new_5kb')
+    ldef_gr_to_bed_file(ldef_5kb_upstream, 'new_5kb_upstream')
+    ldef_gr_to_bed_file(ldef_5kb_outside, 'new_5kb_outside')
 
-ce_exons = locusdef.hg19.exon@dframe
-ce_exons$strand = '.'
-ce_exons$score = 1000
-ce_exons = ce_exons[,c('chrom','start','end','geneid','score','strand')]
-write.table(ce_exons, file = '~/Desktop/postfilter/ce_exons.bed', sep='\t', quote = F, col.names=F, row.names=F)
+    ldef_gr_to_bed_file(ldef_10kb, 'new_10kb')
+    ldef_gr_to_bed_file(ldef_10kb_upstream, 'new_10kb_upstream')
+    ldef_gr_to_bed_file(ldef_10kb_outside, 'new_10kb_outside')
 
-ce_introns = locusdef.hg19.intron@dframe
-ce_introns$strand = '.'
-ce_introns$score = 1000
-ce_introns = ce_introns[,c('chrom','start','end','geneid','score','strand')]
-write.table(ce_introns, file = '~/Desktop/postfilter/ce_introns.bed', sep='\t', quote = F, col.names=F, row.names=F)
+### old ldefs to bed files for checking
+    library(chipenrich.data)
+    data(locusdef.hg19.nearest_tss, package = 'chipenrich.data')
+    data(locusdef.hg19.nearest_gene, package = 'chipenrich.data')
+    data(locusdef.hg19.exon, package = 'chipenrich.data')
+    data(locusdef.hg19.intron, package = 'chipenrich.data')
+    data(locusdef.hg19.1kb, package = 'chipenrich.data')
+    data(locusdef.hg19.5kb, package = 'chipenrich.data')
+    data(locusdef.hg19.10kb, package = 'chipenrich.data')
+    data(locusdef.hg19.10kb_and_more_upstream, package = 'chipenrich.data')
 
-ce_1kb = locusdef.hg19.1kb@dframe
-ce_1kb$strand = '.'
-ce_1kb$score = 1000
-ce_1kb = ce_1kb[,c('chrom','start','end','geneid','score','strand')]
-write.table(ce_1kb, file = '~/Desktop/postfilter/ce_1kb.bed', sep='\t', quote = F, col.names=F, row.names=F)
-
-ce_5kb = locusdef.hg19.5kb@dframe
-ce_5kb$strand = '.'
-ce_5kb$score = 1000
-ce_5kb = ce_5kb[,c('chrom','start','end','geneid','score','strand')]
-write.table(ce_5kb, file = '~/Desktop/postfilter/ce_5kb.bed', sep='\t', quote = F, col.names=F, row.names=F)
-
-ce_10kb = locusdef.hg19.10kb@dframe
-ce_10kb$strand = '.'
-ce_10kb$score = 1000
-ce_10kb = ce_10kb[,c('chrom','start','end','geneid','score','strand')]
-write.table(ce_10kb, file = '~/Desktop/postfilter/ce_10kb.bed', sep='\t', quote = F, col.names=F, row.names=F)
-
-ce_10kb_upstream = locusdef.hg19.10kb_and_more_upstream@dframe
-ce_10kb_upstream$strand = '.'
-ce_10kb_upstream$score = 1000
-ce_10kb_upstream = ce_10kb_upstream[,c('chrom','start','end','geneid','score','strand')]
-write.table(ce_10kb_upstream, file = '~/Desktop/postfilter/ce_10kb_upstream.bed', sep='\t', quote = F, col.names=F, row.names=F)
+    old_ldef_to_bed_file(locusdef.hg19.nearest_tss, 'ce_nearest_tss')
+    old_ldef_to_bed_file(locusdef.hg19.nearest_gene, 'ce_nearest_gene')
+    old_ldef_to_bed_file(locusdef.hg19.exon, 'ce_exons')
+    old_ldef_to_bed_file(locusdef.hg19.intron, 'ce_introns')
+    old_ldef_to_bed_file(locusdef.hg19.1kb, 'ce_1kb')
+    old_ldef_to_bed_file(locusdef.hg19.5kb, 'ce_5kb')
+    old_ldef_to_bed_file(locusdef.hg19.10kb, 'ce_10kb')
+    old_ldef_to_bed_file(locusdef.hg19.10kb_and_more_upstream, 'ce_10kb_upstream')
 
 ################################################################################
