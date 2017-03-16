@@ -11,14 +11,39 @@ Authors@R: c(
 Description: Supporting data for the chipenrich package. Includes pre-defined gene sets, gene locus definitions, and mappability estimates.
 Depends:
     R (>= 3.3.1)
-License: What license is it under?
+Imports:
+	AnnotationDbi,
+	BiocGenerics,
+	methods,
+	GenomicRanges,
+	GenomeInfoDb,
+	IRanges,
+	S4Vectors
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Suggests:
     knitr,
     rmarkdown,
-    testthat
+    testthat,
+	GO.db,
+	KEGG.db,
+	org.Dm.eg.db,
+	org.Hs.eg.d,
+	org.Mm.eg.db,
+	org.Rn.eg.db,
+	reactome.db,
+	readr,
+	rtracklayer,
+	TxDb.Dmelanogaster.UCSC.dm3.ensGene,
+	TxDb.Dmelanogaster.UCSC.dm6.ensGene,
+	TxDb.Hsapiens.UCSC.hg19.knownGene,
+	TxDb.Hsapiens.UCSC.hg38.knownGene,
+	TxDb.Mmusculus.UCSC.mm9.knownGene,
+	TxDb.Mmusculus.UCSC.mm10.knownGene,
+	TxDb.Rnorvegicus.UCSC.rn4.ensGene,
+	TxDb.Rnorvegicus.UCSC.rn5.refGene,
+	TxDb.Rnorvegicus.UCSC.rn6.refGene
 VignetteBuilder: knitr
-RoxygenNote: 5.0.1
-License: GPL-3
+RoxygenNote: 6.0.1
 Maintainer: Raymond G. Cavalcante <rcavalca@umich.edu>

@@ -1,12 +1,12 @@
 # S4 class for storing genesets.
-setClass("GeneSet",representation(
+methods::setClass("GeneSet",representation(
   set.gene = "environment",
   type = "character",
   set.name = "environment",
   all.genes = "character",
   organism = "character",
   dburl = "character"
-),prototype(
+), methods::prototype(
   set.gene = new.env(parent=emptyenv()),
   type = "",
   set.name = new.env(parent=emptyenv()),
@@ -18,9 +18,9 @@ setClass("GeneSet",representation(
 )
 
 # S4 class for storing locus definitions.
-setClass("LocusDefinition", representation(
+methods::setClass("LocusDefinition", methods::representation(
   dframe = "data.frame",
-  granges = "GenomicRanges",
+  granges = "GRanges",
   genome.build = "character",
   organism = "character"
 ),

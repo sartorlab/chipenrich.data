@@ -8,4 +8,3 @@
 \description{
 Supporting data for the chipenrich package. Includes pre-defined gene sets, gene locus definitions, and mappability estimates.
 }
-
