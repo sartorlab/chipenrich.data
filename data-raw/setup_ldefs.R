@@ -1,0 +1,13 @@
+source('data-raw/setup_ldefs_functions.R')
+
+devtools::load_all()
+
+build_locus_definitions('hg19')
+build_locus_definitions('hg38')
+build_locus_definitions('mm9')
+build_locus_definitions('mm10')
+build_locus_definitions('rn4')
+build_locus_definitions('rn5')
+build_locus_definitions('rn6')
+build_locus_definitions('dm3')
+build_locus_definitions('dm6')
