@@ -1,5 +1,4 @@
 source('data-raw/setup_ldefs_functions.R')
-
 devtools::load_all()
 
 build_locus_definitions('hg19')

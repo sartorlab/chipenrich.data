@@ -1,3 +1,14 @@
+CHANGES IN VERSION 1.11.2
+-------------------------
+
+  o Updated functions to build Gene Ontology genesets for human, mouse, rat, and fly.
+
+    o Enforce minimum geneset size of 10.
+
+    o Include code for roxygen2 documentation blocks to be placed in R/data.R.
+
+  o Updated documentation to include package version numbers and build dates.
+
 CHANGES IN VERSION 1.11.1
 -------------------------
 

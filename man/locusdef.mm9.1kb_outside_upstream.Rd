@@ -12,12 +12,15 @@
     \item{organism}{A \code{character} indicating the organism name. In this case, Mus musculus.}
 }}
 \source{
-Appropriate TxDb and orgDb packages for genome build and organism, and GENCODE Comprehensive gene annotations for reference chromosomes if available.
+R packages: TxDb.Mmusculus.UCSC.mm9.knownGene_3.2.2 and org.Mm.eg.db_3.4.0. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_mouse/release_M9/gencode.vM9.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_mouse/release_M9/gencode.vM9.metadata.EntrezGene.gz
 }
 \usage{
 locusdef.mm9.1kb_outside_upstream
 }
 \description{
 A \code{LocusDefinition} where a gene locus is defined as the region beyond 1kb upstream of the TSS and bounded by the midpoint between the TSS and the next upstream TSS.
+}
+\details{
+Built on Sat Mar 18 12:57:35 2017.
 }
 \keyword{datasets}

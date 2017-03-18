@@ -10,7 +10,7 @@
     \item{symbol}{The gene symbol for the TSS}
 }}
 \source{
-Appropriate TxDb and orgDb packages for genome build and organism.
+R packages: TxDb.Hsapiens.UCSC.hg38.knownGene_3.4.0 and org.Hs.eg.db_3.4.0. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/gencode.v25.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/gencode.v25.metadata.EntrezGene.gz
 }
 \usage{
 tss.hg38

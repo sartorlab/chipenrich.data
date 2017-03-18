@@ -12,7 +12,7 @@
     \item{organism}{A \code{character} indicating the organism name. In this case, Drosophila melanogaster.}
 }}
 \source{
-Appropriate TxDb and orgDb packages for genome build and organism, and GENCODE Comprehensive gene annotations for reference chromosomes if available.
+R packages: TxDb.Dmelanogaster.UCSC.dm6.ensGene_3.3.0 and org.Dm.eg.db_3.4.0.
 }
 \usage{
 locusdef.dm6.10kb
@@ -22,5 +22,7 @@ A \code{LocusDefinition} where a gene locus is defined within 10kb upstream and 
 }
 \details{
 For the dm6 genome, original gene IDs are from FLYBASE and so an additional step of converting to Entrez IDs is done.
+
+Built on Sat Mar 18 13:08:40 2017.
 }
 \keyword{datasets}

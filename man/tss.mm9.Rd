@@ -10,7 +10,7 @@
     \item{symbol}{The gene symbol for the TSS}
 }}
 \source{
-Appropriate TxDb and orgDb packages for genome build and organism.
+R packages: TxDb.Mmusculus.UCSC.mm9.knownGene_3.2.2 and org.Mm.eg.db_3.4.0. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_mouse/release_M9/gencode.vM9.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_mouse/release_M9/gencode.vM9.metadata.EntrezGene.gz
 }
 \usage{
 tss.mm9

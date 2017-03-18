@@ -12,12 +12,15 @@
     \item{organism}{A \code{character} indicating the organism name. In this case, Rattus norvegicus.}
 }}
 \source{
-Appropriate TxDb and orgDb packages for genome build and organism, and GENCODE Comprehensive gene annotations for reference chromosomes if available.
+R packages: TxDb.Rnorvegicus.UCSC.rn6.refGene_3.4.0 and org.Rn.eg.db_3.4.0.
 }
 \usage{
 locusdef.rn6.nearest_gene
 }
 \description{
 A \code{LocusDefinition} where a gene locus is defined as the region spanning the midpoints between adjacent TSSs and TESs.
+}
+\details{
+Built on Sat Mar 18 13:07:26 2017.
 }
 \keyword{datasets}

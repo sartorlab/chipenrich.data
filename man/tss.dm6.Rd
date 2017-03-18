@@ -10,7 +10,7 @@
     \item{symbol}{The gene symbol for the TSS}
 }}
 \source{
-Appropriate TxDb and orgDb packages for genome build and organism.
+R packages: TxDb.Dmelanogaster.UCSC.dm6.ensGene_3.3.0 and org.Dm.eg.db_3.4.0.
 }
 \usage{
 tss.dm6

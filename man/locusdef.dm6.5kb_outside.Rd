@@ -12,15 +12,17 @@
     \item{organism}{A \code{character} indicating the organism name. In this case, Drosophila melanogaster.}
 }}
 \source{
-Appropriate TxDb and orgDb packages for genome build and organism, and GENCODE Comprehensive gene annotations for reference chromosomes if available.
+R packages: TxDb.Dmelanogaster.UCSC.dm6.ensGene_3.3.0 and org.Dm.eg.db_3.4.0.
 }
 \usage{
 locusdef.dm6.5kb_outside
 }
 \description{
-A \code{LocusDefinition} where a gene locus is defined as the region beyond 5kb_outside upstream and downstream of the TSS and bounded by the midpoints between the TSS and the next upstream and downstream TSSs.
+A \code{LocusDefinition} where a gene locus is defined as the region beyond 5kb upstream and downstream of the TSS and bounded by the midpoints between the TSS and the next upstream and downstream TSSs.
 }
 \details{
 For the dm6 genome, original gene IDs are from FLYBASE and so an additional step of converting to Entrez IDs is done.
+
+Built on Sat Mar 18 13:08:40 2017.
 }
 \keyword{datasets}

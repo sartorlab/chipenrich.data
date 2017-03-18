@@ -12,12 +12,15 @@
     \item{organism}{A \code{character} indicating the organism name. In this case, Rattus norvegicus.}
 }}
 \source{
-Appropriate TxDb and orgDb packages for genome build and organism, and GENCODE Comprehensive gene annotations for reference chromosomes if available.
+R packages: TxDb.Rnorvegicus.UCSC.rn5.refGene_3.4.0 and org.Rn.eg.db_3.4.0.
 }
 \usage{
 locusdef.rn5.5kb
 }
 \description{
 A \code{LocusDefinition} where a gene locus is defined within 5kb upstream and downstream of the TSS.
+}
+\details{
+Built on Sat Mar 18 13:07:11 2017.
 }
 \keyword{datasets}

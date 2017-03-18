@@ -12,12 +12,15 @@
     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
 }}
 \source{
-Appropriate TxDb and orgDb packages for genome build and organism, and GENCODE Comprehensive gene annotations for reference chromosomes if available.
+R packages: TxDb.Hsapiens.UCSC.hg38.knownGene_3.4.0 and org.Hs.eg.db_3.4.0. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/gencode.v25.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/gencode.v25.metadata.EntrezGene.gz
 }
 \usage{
 locusdef.hg38.1kb_outside
 }
 \description{
-A \code{LocusDefinition} where a gene locus is defined as the region beyond 1kb_outside upstream and downstream of the TSS and bounded by the midpoints between the TSS and the next upstream and downstream TSSs.
+A \code{LocusDefinition} where a gene locus is defined as the region beyond 1kb upstream and downstream of the TSS and bounded by the midpoints between the TSS and the next upstream and downstream TSSs.
+}
+\details{
+Built on Sat Mar 18 12:56:34 2017.
 }
 \keyword{datasets}

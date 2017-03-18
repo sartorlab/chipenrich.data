@@ -1,3 +1,9 @@
+get_package_version = function(package_name) {
+	packages = data.frame(installed.packages()[,c('Package','Version')], row.names = NULL, stringsAsFactors=F)
+	version_str = paste(subset(packages, Package == package_name), collapse='_')
+	return(version_str)
+}
+
 # The precede() and follow() functions are quiet weird so it is recommended that
 # you look at a simple example and try to figure out what's going on.
 #
@@ -901,7 +907,7 @@ ldef_gr_to_bed_file = function(ldef_gr, ldef_path) {
 #' @return \code{NULL}
 #'
 
-to_tss_rdata = function(gr, genome) {
+to_tss_rdata = function(gr, genome, txdb_version, orgdb_version, gencode_version, mapping_version) {
     tss = gr$gr_tss
     mcols(tss)$gene_id = mcols(gr)$gene_id
     mcols(tss)$symbol = mcols(gr)$symbol
@@ -916,6 +922,14 @@ to_tss_rdata = function(gr, genome) {
     ### Document the tss object
     # The actual documentation to write, as a roxygen2 block
     # See: http://r-pkgs.had.co.nz/data.html section on Documenting datasets
+
+	# Additional information about GENCODE
+	if(genome %in% c('hg19', 'hg38', 'mm9', 'mm10')) {
+		source_desc = sprintf("#' @source R packages: %s and %s. GENCODE resources: %s and %s", txdb_version, orgdb_version, gencode_version, mapping_version)
+	} else {
+		source_desc = sprintf("#' @source R packages: %s and %s.", txdb_version, orgdb_version)
+	}
+
     doc = c(
         sprintf("#' tss.%s TSS locations", genome),
         "#'",
@@ -926,7 +940,7 @@ to_tss_rdata = function(gr, genome) {
         "#'     \\item{gene_id}{The Entrez ID for the TSS}",
         "#'     \\item{symbol}{The gene symbol for the TSS}",
         "#' }",
-        "#' @source Appropriate TxDb and orgDb packages for genome build and organism.",
+        source_desc,
         sprintf('"tss.%s"', genome),
         ''
     )
@@ -947,7 +961,7 @@ to_tss_rdata = function(gr, genome) {
 #' @return \code{NULL}
 #'
 
-ldef_gr_to_LocusDefinition = function(ldef_gr, genome, organism, ldef_name) {
+ldef_gr_to_LocusDefinition = function(ldef_gr, genome, organism, ldef_name, txdb_version, orgdb_version, gencode_version ,mapping_version) {
 
     # Convert to data.frame
     df = data.frame(ldef_gr, stringsAsFactors=FALSE)
@@ -966,7 +980,8 @@ ldef_gr_to_LocusDefinition = function(ldef_gr, genome, organism, ldef_name) {
     save(list = sprintf('locusdef.%s.%s', genome, ldef_name), file = sprintf('data/locusdef.%s.%s.RData', genome, ldef_name), compress = 'xz')
 
     ### Document it and add the documentation to R/data.R
-    # Detailed description based on specific locus definition
+
+	# Detailed description based on specific locus definition
     if(ldef_name == 'nearest_tss') {
         detailed_desc = "#' A \\code{LocusDefinition} where a gene locus is defined as the region spanning the midpoints between adjacent TSSs."
     } else if (ldef_name == 'nearest_gene') {
@@ -978,7 +993,7 @@ ldef_gr_to_LocusDefinition = function(ldef_gr, genome, organism, ldef_name) {
         detailed_desc = sprintf("#' A \\code{LocusDefinition} where a gene locus is defined as the region beyond %s upstream of the TSS and bounded by the midpoint between the TSS and the next upstream TSS.", nkb)
     } else if (ldef_name == '1kb_outside' || ldef_name == '5kb_outside' || ldef_name == '10kb_outside') {
         nkb = unlist(strsplit(ldef_name, '_'))[1]
-        detailed_desc = sprintf("#' A \\code{LocusDefinition} where a gene locus is defined as the region beyond %s upstream and downstream of the TSS and bounded by the midpoints between the TSS and the next upstream and downstream TSSs.", ldef_name)
+        detailed_desc = sprintf("#' A \\code{LocusDefinition} where a gene locus is defined as the region beyond %s upstream and downstream of the TSS and bounded by the midpoints between the TSS and the next upstream and downstream TSSs.", nkb)
     } else if (ldef_name == 'exon') {
         detailed_desc = sprintf("#' A \\code{LocusDefinition} where a gene locus is defined as the exons belonging to genes.", ldef_name)
     } else if (ldef_name == 'intron') {
@@ -1000,6 +1015,13 @@ ldef_gr_to_LocusDefinition = function(ldef_gr, genome, organism, ldef_name) {
         genome_desc = "#'"
     }
 
+	# Additional information about GENCODE
+	if(genome %in% c('hg19', 'hg38', 'mm9', 'mm10')) {
+		source_desc = sprintf("#' @source R packages: %s and %s. GENCODE resources: %s and %s", txdb_version, orgdb_version, gencode_version, mapping_version)
+	} else {
+		source_desc = sprintf("#' @source R packages: %s and %s.", txdb_version, orgdb_version)
+	}
+
     # The actual documentation to write, as a roxygen2 block
     # See: http://r-pkgs.had.co.nz/data.html section on Documenting datasets
     doc = c(
@@ -1007,6 +1029,8 @@ ldef_gr_to_LocusDefinition = function(ldef_gr, genome, organism, ldef_name) {
         "#'",
         detailed_desc,
         genome_desc,
+        sprintf("#' Built on %s.", date()),
+        "#'",
         "#' @format A \\code{LocusDefinition} object with the following slots:",
         "#' \\describe{",
         "#'     \\item{granges}{A \\code{GRanges} of the locus definitions with \\code{mcols} for Entrez Gene ID \\code{gene_id} and gene symbol \\code{symbol}}",
@@ -1014,12 +1038,14 @@ ldef_gr_to_LocusDefinition = function(ldef_gr, genome, organism, ldef_name) {
         sprintf("#'     \\item{genome.build}{A \\code{character} indicating the genome build. In this case, %s.}", genome),
         sprintf("#'     \\item{organism}{A \\code{character} indicating the organism name. In this case, %s.}", organism),
         "#' }",
-        "#' @source Appropriate TxDb and orgDb packages for genome build and organism, and GENCODE Comprehensive gene annotations for reference chromosomes if available.",
+        source_desc,
         sprintf('"locusdef.%s.%s"', genome, ldef_name),
         ''
     )
 
     write(doc, file = 'R/data.R', append = TRUE)
+
+	return(NULL)
 }
 
 ################################################################################
@@ -1052,6 +1078,10 @@ build_locus_definitions = function(genome) {
         gencode_url = 'data-raw/gencode.v25lift37.annotation.gff3.gz'
         mapping_url = 'data-raw/gencode.v25lift37.metadata.EntrezGene.gz'
         organism = 'Homo sapiens'
+        txdb_version = get_package_version('TxDb.Hsapiens.UCSC.hg19.knownGene')
+        orgdb_version = get_package_version('org.Hs.eg.db')
+		gencode_version = 'ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz'
+		mapping_version = 'ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz'
     } else if (genome == 'hg38') {
         # Gives Entrez IDs
         require(TxDb.Hsapiens.UCSC.hg38.knownGene)
@@ -1063,6 +1093,10 @@ build_locus_definitions = function(genome) {
         gencode_url = 'data-raw/gencode.v25.annotation.gff3.gz'
         mapping_url = 'data-raw/gencode.v25.metadata.EntrezGene.gz'
         organism = 'Homo sapiens'
+        txdb_version = get_package_version('TxDb.Hsapiens.UCSC.hg38.knownGene')
+        orgdb_version = get_package_version('org.Hs.eg.db')
+		gencode_version = 'ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/gencode.v25.annotation.gff3.gz'
+		mapping_version = 'ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/gencode.v25.metadata.EntrezGene.gz'
     } else if (genome == 'mm9') {
         # Gives Entrez IDs
         require(TxDb.Mmusculus.UCSC.mm9.knownGene)
@@ -1074,6 +1108,10 @@ build_locus_definitions = function(genome) {
         gencode_url = 'data-raw/gencode.vM9.annotation.gff3.gz'
         mapping_url = 'data-raw/gencode.vM9.metadata.EntrezGene.gz'
         organism = 'Mus musculus'
+        txdb_version = get_package_version('TxDb.Mmusculus.UCSC.mm9.knownGene')
+        orgdb_version = get_package_version('org.Mm.eg.db')
+		gencode_version = 'ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_mouse/release_M9/gencode.vM9.annotation.gff3.gz'
+		mapping_version = 'ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_mouse/release_M9/gencode.vM9.metadata.EntrezGene.gz'
     } else if (genome == 'mm10') {
         # Gives Entrez IDs
         require(TxDb.Mmusculus.UCSC.mm10.knownGene)
@@ -1085,6 +1123,10 @@ build_locus_definitions = function(genome) {
         gencode_url = 'data-raw/gencode.vM12.annotation.gff3.gz'
         mapping_url = 'data-raw/gencode.vM12.metadata.EntrezGene.gz'
         organism = 'Mus musculus'
+        txdb_version = get_package_version('TxDb.Mmusculus.UCSC.mm10.knownGene')
+        orgdb_version = get_package_version('org.Mm.eg.db')
+		gencode_version = 'ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_mouse/release_M12/gencode.vM12.annotation.gff3.gz'
+		mapping_version = 'ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_mouse/release_M12/gencode.vM12.metadata.EntrezGene.gz'
     } else if (genome == 'rn4') {
         # Gives ENSEMBL IDs
         require(TxDb.Rnorvegicus.UCSC.rn4.ensGene)
@@ -1096,6 +1138,10 @@ build_locus_definitions = function(genome) {
         gencode_url = NULL
         mapping_url = NULL
         organism = 'Rattus norvegicus'
+        txdb_version = get_package_version('TxDb.Rnorvegicus.UCSC.rn4.ensGene')
+        orgdb_version = get_package_version('org.Rn.eg.db')
+		gencode_version = NULL
+		mapping_version = NULL
     } else if (genome == 'rn5') {
         # Gives Entrez IDs
         require(TxDb.Rnorvegicus.UCSC.rn5.refGene)
@@ -1107,6 +1153,10 @@ build_locus_definitions = function(genome) {
         gencode_url = NULL
         mapping_url = NULL
         organism = 'Rattus norvegicus'
+        txdb_version = get_package_version('TxDb.Rnorvegicus.UCSC.rn5.refGene')
+        orgdb_version = get_package_version('org.Rn.eg.db')
+		gencode_version = NULL
+		mapping_version = NULL
     } else if (genome == 'rn6') {
         # Gives Entrez IDs
         require(TxDb.Rnorvegicus.UCSC.rn6.refGene)
@@ -1118,6 +1168,10 @@ build_locus_definitions = function(genome) {
         gencode_url = NULL
         mapping_url = NULL
         organism = 'Rattus norvegicus'
+        txdb_version = get_package_version('TxDb.Rnorvegicus.UCSC.rn6.refGene')
+        orgdb_version = get_package_version('org.Rn.eg.db')
+		gencode_version = NULL
+		mapping_version = NULL
     } else if (genome == 'dm3') {
         # Gives ENSEMBL IDs
         require(TxDb.Dmelanogaster.UCSC.dm3.ensGene)
@@ -1129,6 +1183,10 @@ build_locus_definitions = function(genome) {
         gencode_url = NULL
         mapping_url = NULL
         organism = 'Drosophila melanogaster'
+        txdb_version = get_package_version('TxDb.Dmelanogaster.UCSC.dm3.ensGene')
+        orgdb_version = get_package_version('org.Dm.eg.db')
+		gencode_version = NULL
+		mapping_version = NULL
     } else if (genome == 'dm6') {
         # Gives ENSEMBL IDs
         require(TxDb.Dmelanogaster.UCSC.dm6.ensGene)
@@ -1140,6 +1198,10 @@ build_locus_definitions = function(genome) {
         gencode_url = NULL
         mapping_url = NULL
         organism = 'Drosophila melanogaster'
+        txdb_version = get_package_version('TxDb.Dmelanogaster.UCSC.dm6.ensGene')
+        orgdb_version = get_package_version('org.Dm.eg.db')
+		gencode_version = NULL
+		mapping_version = NULL
     } else {
         stop('Select a valid genome')
     }
@@ -1283,29 +1345,29 @@ build_locus_definitions = function(genome) {
     ### Construct tss.[genome_build].RData
     ################################################################################
 
-        to_tss_rdata(gr = gr_transcripts, genome = genome)
+        to_tss_rdata(gr = gr_transcripts, genome = genome, txdb_version, orgdb_version, gencode_version, mapping_version)
 
     ################################################################################
     ### Construct LocusDefinition class objects for each
     ################################################################################
 
-        ldef_gr_to_LocusDefinition(ldef_gr = ldef_ntss, genome = genome, organism = organism, ldef_name = 'nearest_tss')
-        ldef_gr_to_LocusDefinition(ldef_gr = ldef_ngene, genome = genome, organism = organism, ldef_name = 'nearest_gene')
+        ldef_gr_to_LocusDefinition(ldef_gr = ldef_ntss, genome = genome, organism = organism, ldef_name = 'nearest_tss', txdb_version, orgdb_version, gencode_version, mapping_version)
+        ldef_gr_to_LocusDefinition(ldef_gr = ldef_ngene, genome = genome, organism = organism, ldef_name = 'nearest_gene', txdb_version, orgdb_version, gencode_version, mapping_version)
 
-        ldef_gr_to_LocusDefinition(ldef_gr = ldef_exons, genome = genome, organism = organism, ldef_name = 'exon')
-        ldef_gr_to_LocusDefinition(ldef_gr = ldef_introns, genome = genome, organism = organism, ldef_name = 'intron')
+        ldef_gr_to_LocusDefinition(ldef_gr = ldef_exons, genome = genome, organism = organism, ldef_name = 'exon', txdb_version, orgdb_version, gencode_version, mapping_version)
+        ldef_gr_to_LocusDefinition(ldef_gr = ldef_introns, genome = genome, organism = organism, ldef_name = 'intron', txdb_version, orgdb_version, gencode_version, mapping_version)
 
-        ldef_gr_to_LocusDefinition(ldef_gr = ldef_1kb, genome = genome, organism = organism, ldef_name = '1kb')
-        ldef_gr_to_LocusDefinition(ldef_gr = ldef_1kb_upstream, genome = genome, organism = organism, ldef_name = '1kb_outside_upstream')
-        ldef_gr_to_LocusDefinition(ldef_gr = ldef_1kb_outside, genome = genome, organism = organism, ldef_name = '1kb_outside')
+        ldef_gr_to_LocusDefinition(ldef_gr = ldef_1kb, genome = genome, organism = organism, ldef_name = '1kb', txdb_version, orgdb_version, gencode_version, mapping_version)
+        ldef_gr_to_LocusDefinition(ldef_gr = ldef_1kb_upstream, genome = genome, organism = organism, ldef_name = '1kb_outside_upstream', txdb_version, orgdb_version, gencode_version, mapping_version)
+        ldef_gr_to_LocusDefinition(ldef_gr = ldef_1kb_outside, genome = genome, organism = organism, ldef_name = '1kb_outside', txdb_version, orgdb_version, gencode_version, mapping_version)
 
-        ldef_gr_to_LocusDefinition(ldef_gr = ldef_5kb, genome = genome, organism = organism, ldef_name = '5kb')
-        ldef_gr_to_LocusDefinition(ldef_gr = ldef_5kb_upstream, genome = genome, organism = organism, ldef_name = '5kb_outside_upstream')
-        ldef_gr_to_LocusDefinition(ldef_gr = ldef_5kb_outside, genome = genome, organism = organism, ldef_name = '5kb_outside')
+        ldef_gr_to_LocusDefinition(ldef_gr = ldef_5kb, genome = genome, organism = organism, ldef_name = '5kb', txdb_version, orgdb_version, gencode_version, mapping_version)
+        ldef_gr_to_LocusDefinition(ldef_gr = ldef_5kb_upstream, genome = genome, organism = organism, ldef_name = '5kb_outside_upstream', txdb_version, orgdb_version, gencode_version, mapping_version)
+        ldef_gr_to_LocusDefinition(ldef_gr = ldef_5kb_outside, genome = genome, organism = organism, ldef_name = '5kb_outside', txdb_version, orgdb_version, gencode_version, mapping_version)
 
-        ldef_gr_to_LocusDefinition(ldef_gr = ldef_10kb, genome = genome, organism = organism, ldef_name = '10kb')
-        ldef_gr_to_LocusDefinition(ldef_gr = ldef_10kb_upstream, genome = genome, organism = organism, ldef_name = '10kb_outside_upstream')
-        ldef_gr_to_LocusDefinition(ldef_gr = ldef_10kb_outside, genome = genome, organism = organism, ldef_name = '10kb_outside')
+        ldef_gr_to_LocusDefinition(ldef_gr = ldef_10kb, genome = genome, organism = organism, ldef_name = '10kb', txdb_version, orgdb_version, gencode_version, mapping_version)
+        ldef_gr_to_LocusDefinition(ldef_gr = ldef_10kb_upstream, genome = genome, organism = organism, ldef_name = '10kb_outside_upstream', txdb_version, orgdb_version, gencode_version, mapping_version)
+        ldef_gr_to_LocusDefinition(ldef_gr = ldef_10kb_outside, genome = genome, organism = organism, ldef_name = '10kb_outside', txdb_version, orgdb_version, gencode_version, mapping_version)
 
     ################################################################################
     ### Output for sanity checks in Genome Browser
