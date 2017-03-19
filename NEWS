@@ -1,3 +1,15 @@
+CHANGES IN VERSION 1.11.3
+-------------------------
+
+  o Added http://www.reactome.org/download/current/NCBI2Reactome_All_Levels.txt
+    to data-raw/ to build Reactome genesets. (Downloaded 2017-03-19)
+
+  o Added functions to build Reactome genesets for human, mouse, rat, and fly.
+
+    o Fly Reactome genesets are new, and the others are updated.
+
+  o Some documentation typo fixes.
+
 CHANGES IN VERSION 1.11.2
 -------------------------
 

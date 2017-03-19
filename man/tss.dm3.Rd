@@ -15,4 +15,7 @@ R packages: TxDb.Dmelanogaster.UCSC.dm3.ensGene_3.2.2 and org.Dm.eg.db_3.4.0.
 \usage{
 tss.dm3
 }
+\description{
+A \code{GRanges} with all the TSSs for dm3. Primarily used in the \code{assign_peaks()} function to report distance of a peak to the nearest TSS. Also used to build the QC plot with distribution of peaks to TSSs.
+}
 \keyword{datasets}

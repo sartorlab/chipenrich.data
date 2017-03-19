@@ -15,4 +15,7 @@ R packages: TxDb.Mmusculus.UCSC.mm9.knownGene_3.2.2 and org.Mm.eg.db_3.4.0. GENC
 \usage{
 tss.mm9
 }
+\description{
+A \code{GRanges} with all the TSSs for mm9. Primarily used in the \code{assign_peaks()} function to report distance of a peak to the nearest TSS. Also used to build the QC plot with distribution of peaks to TSSs.
+}
 \keyword{datasets}

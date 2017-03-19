@@ -106,7 +106,7 @@ build_GO_genesets = function(org_code = c('Dm','Hs','Mm','Rn'), min_geneset_size
 		doc = c(
 			sprintf("#' geneset.%s.%s genesets for %s", name, org, GO_org_name),
 			"#'",
-			sprintf("#' %s (%s) genesets for %s. All genesets are required to >= %s Entrez IDs.", GO_branch_names[[name]], name, GO_org_name, min_geneset_size),
+			sprintf("#' %s (%s) genesets for %s. All genesets are required to have >= %s Entrez IDs.", GO_branch_names[[name]], name, GO_org_name, min_geneset_size),
 			sprintf("#' Built on %s.", date()),
 			"#'",
 			"#' @format A \\code{GeneSet} object with the following slots:",

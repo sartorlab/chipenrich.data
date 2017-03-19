@@ -933,7 +933,7 @@ to_tss_rdata = function(gr, genome, txdb_version, orgdb_version, gencode_version
     doc = c(
         sprintf("#' tss.%s TSS locations", genome),
         "#'",
-        sprintf("#' A \\code{GRanges} with all the TSSs for %s. Primarily used in the \\code{assign_peaks()} function to report distance of a peak to the nearest TSS. Also used to build the QC plot with distribution of peaks to TSSs.}", genome),
+        sprintf("#' A \\code{GRanges} with all the TSSs for %s. Primarily used in the \\code{assign_peaks()} function to report distance of a peak to the nearest TSS. Also used to build the QC plot with distribution of peaks to TSSs.", genome),
         "#'",
         "#' @format A \\code{GRanges} object with the following \\code{mcols}:",
         "#' \\describe{",

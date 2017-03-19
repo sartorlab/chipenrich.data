@@ -15,4 +15,7 @@ R packages: TxDb.Rnorvegicus.UCSC.rn6.refGene_3.4.0 and org.Rn.eg.db_3.4.0.
 \usage{
 tss.rn6
 }
+\description{
+A \code{GRanges} with all the TSSs for rn6. Primarily used in the \code{assign_peaks()} function to report distance of a peak to the nearest TSS. Also used to build the QC plot with distribution of peaks to TSSs.
+}
 \keyword{datasets}
