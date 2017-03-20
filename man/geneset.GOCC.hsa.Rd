@@ -20,7 +20,7 @@ org.Hs.eg.db_3.4.0 and GO.db_3.4.0
 geneset.GOCC.hsa
 }
 \description{
-Gene Ontology Cellular Component (GOCC) genesets for Homo sapiens. All genesets are required to >= 10 Entrez IDs.
-Built on Sat Mar 18 13:14:28 2017.
+Gene Ontology Cellular Component (GOCC) genesets for Homo sapiens. All genesets are required to have >= 10 Entrez IDs.
+Built on Mon Mar 20 13:44:28 2017.
 }
 \keyword{datasets}

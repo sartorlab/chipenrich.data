@@ -20,7 +20,7 @@ org.Mm.eg.db_3.4.0 and GO.db_3.4.0
 geneset.GOBP.mmu
 }
 \description{
-Gene Ontology Biological Process (GOBP) genesets for Mus musculus. All genesets are required to >= 10 Entrez IDs.
-Built on Sat Mar 18 13:15:40 2017.
+Gene Ontology Biological Process (GOBP) genesets for Mus musculus. All genesets are required to have >= 10 Entrez IDs.
+Built on Mon Mar 20 13:45:24 2017.
 }
 \keyword{datasets}

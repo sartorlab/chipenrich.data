@@ -18,6 +18,8 @@ Imports:
 	GenomicRanges,
 	GenomeInfoDb,
 	IRanges,
+	readr,
+	rtracklayer,
 	S4Vectors
 License: GPL-3
 Encoding: UTF-8
@@ -29,12 +31,9 @@ Suggests:
 	GO.db,
 	KEGG.db,
 	org.Dm.eg.db,
-	org.Hs.eg.d,
+	org.Hs.eg.db,
 	org.Mm.eg.db,
 	org.Rn.eg.db,
-	reactome.db,
-	readr,
-	rtracklayer,
 	TxDb.Dmelanogaster.UCSC.dm3.ensGene,
 	TxDb.Dmelanogaster.UCSC.dm6.ensGene,
 	TxDb.Hsapiens.UCSC.hg19.knownGene,

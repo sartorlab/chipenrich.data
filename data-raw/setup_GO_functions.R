@@ -61,6 +61,10 @@ build_GO_genesets = function(org_code = c('Dm','Hs','Mm','Rn'), min_geneset_size
 		org_GO[names(org_GO) %in% branch_terms]
 	})
 
+	GO_genesets = lapply(GO_genesets, function(branch) {
+		lapply(branch, unique)
+	})
+
 	# Filter by minimum gene set size
 	message('Require genesets to have >= 10 genes...')
 	GO_genesets = lapply(GO_genesets, function(branch) {

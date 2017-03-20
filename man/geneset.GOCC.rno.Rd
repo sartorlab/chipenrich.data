@@ -20,7 +20,7 @@ org.Rn.eg.db_3.4.0 and GO.db_3.4.0
 geneset.GOCC.rno
 }
 \description{
-Gene Ontology Cellular Component (GOCC) genesets for Rattus norvegicus. All genesets are required to >= 10 Entrez IDs.
-Built on Sat Mar 18 13:16:58 2017.
+Gene Ontology Cellular Component (GOCC) genesets for Rattus norvegicus. All genesets are required to have >= 10 Entrez IDs.
+Built on Mon Mar 20 13:46:20 2017.
 }
 \keyword{datasets}

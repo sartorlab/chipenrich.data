@@ -1210,11 +1210,9 @@ build_locus_definitions = function(genome) {
 
     if(!is.null(gencode_url)) {
         ### GENCODE annotations
-        # 'ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz'
         gencode = rtracklayer::readGFF(gencode_url)
 
         ### ENSEMBL transcript ID to Entrez ID mapping
-        # 'ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz'
         ens2eg = readr::read_tsv(mapping_url, col_names = c('ens_id','gene_id'))
     } else {
         gencode = NULL
@@ -1223,9 +1221,7 @@ build_locus_definitions = function(genome) {
 
     if(is.null(egENSEMBL2EG)) {
         ### Build Entrez ID to gene symbol mapping
-            # Get the gene symbol that are mapped to an entrez gene identifiers
             mapped_genes = AnnotationDbi::mappedkeys(egSYMBOL)
-            # Convert to a data.frame
             eg2symbol = as.data.frame(egSYMBOL[mapped_genes])
             eg2symbol$gene_id = as.integer(eg2symbol$gene_id)
 
