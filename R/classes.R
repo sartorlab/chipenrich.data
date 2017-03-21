@@ -1,12 +1,12 @@
-# S4 class for storing genesets. 
-setClass("GeneSet",representation(
+# S4 class for storing genesets.
+methods::setClass("GeneSet",representation(
   set.gene = "environment",
   type = "character",
   set.name = "environment",
   all.genes = "character",
   organism = "character",
   dburl = "character"
-),prototype(
+), methods::prototype(
   set.gene = new.env(parent=emptyenv()),
   type = "",
   set.name = new.env(parent=emptyenv()),
@@ -15,13 +15,12 @@ setClass("GeneSet",representation(
   dburl = ""
 ),
   package = "chipenrich.data"
-);
+)
 
-# S4 class for storing locus definitions. 
-setClass("LocusDefinition",representation(
+# S4 class for storing locus definitions.
+methods::setClass("LocusDefinition", methods::representation(
   dframe = "data.frame",
-  granges = "GenomicRanges",
-  chrom2iranges = "list",
+  granges = "GRanges",
   genome.build = "character",
   organism = "character"
 ),

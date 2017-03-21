@@ -1,24 +1,48 @@
 Package: chipenrich.data
-Type: Package
-Title: Gene set enrichment analysis for ChIP-seq data
-Version: 1.11.1
-Date: 2016-11-18
+Title: What the Package Does (one line, title case)
+Version: 1.11.3
+Date: 2017-03-19
 Authors@R: c(
-	person(c("Ryan","P."),"Welch",role = c("aut","cph"),email = "welchr@umich.edu"),
+	person(c("Ryan P."),"Welch",role = c("aut","cph"),email = "welchr@umich.edu"),
 	person("Chee","Lee",role = c("aut"),email = "cheelee@umich.edu"),
-	person(c("Raymond","G."),"Cavalcante",role = c("aut","cre"),email = "rcavalca@umich.edu"),
-	person(c("Laura","J."),"Scott",role = c("ths"), email = "ljst@umich.edu"),
-	person(c("Maureen","A."),"Sartor",role = c("ths"),email = "sartorma@med.umich.edu"))
-Depends: R (>= 3.1.0)
-Imports: methods, GenomicRanges, IRanges, BiocGenerics
-biocViews: ExperimentData, Genome, ChIPSeqData
+	person("Raymond G.","Cavalcante",role = c("aut","cre"),email = "rcavalca@umich.edu"),
+	person(c("Laura J."),"Scott",role = c("ths"), email = "ljst@umich.edu"),
+	person(c("Maureen A."),"Sartor",role = c("ths"),email = "sartorma@med.umich.edu"))
 Description: Supporting data for the chipenrich package. Includes pre-defined gene sets, gene locus definitions, and mappability estimates.
+Depends:
+    R (>= 3.3.1)
+Imports:
+	AnnotationDbi,
+	BiocGenerics,
+	methods,
+	GenomicRanges,
+	GenomeInfoDb,
+	IRanges,
+	readr,
+	rtracklayer,
+	S4Vectors
 License: GPL-3
-LazyLoad: yes
-Packaged: 2016-11-18; rcavalca
-Author: Ryan P. Welch [aut, cph],
-  Chee Lee [aut],
-  Raymond G. Cavalcante [aut, cre],
-  Laura J. Scott [ths],
-  Maureen A. Sartor [ths]
-Maintainer: Ryan P. Welch <welchr@umich.edu>, Chee Lee <cheelee@umich.edu>, Raymond G. Cavalcante <rcavalca@umich.edu>
+Encoding: UTF-8
+LazyData: true
+Suggests:
+    knitr,
+    rmarkdown,
+    testthat,
+	GO.db,
+	KEGG.db,
+	org.Dm.eg.db,
+	org.Hs.eg.db,
+	org.Mm.eg.db,
+	org.Rn.eg.db,
+	TxDb.Dmelanogaster.UCSC.dm3.ensGene,
+	TxDb.Dmelanogaster.UCSC.dm6.ensGene,
+	TxDb.Hsapiens.UCSC.hg19.knownGene,
+	TxDb.Hsapiens.UCSC.hg38.knownGene,
+	TxDb.Mmusculus.UCSC.mm9.knownGene,
+	TxDb.Mmusculus.UCSC.mm10.knownGene,
+	TxDb.Rnorvegicus.UCSC.rn4.ensGene,
+	TxDb.Rnorvegicus.UCSC.rn5.refGene,
+	TxDb.Rnorvegicus.UCSC.rn6.refGene
+VignetteBuilder: knitr
+RoxygenNote: 6.0.1
+Maintainer: Raymond G. Cavalcante <rcavalca@umich.edu>

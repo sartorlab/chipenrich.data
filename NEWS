@@ -1,3 +1,52 @@
+CHANGES IN VERSION 1.11.3
+-------------------------
+
+  o Added http://www.reactome.org/download/current/NCBI2Reactome_All_Levels.txt
+    to data-raw/ to build Reactome genesets. (Downloaded 2017-03-19)
+
+  o Added functions to build Reactome genesets for human, mouse, rat, and fly.
+
+    o Fly Reactome genesets are new, and the others are updated.
+
+  o Some documentation typo fixes.
+
+CHANGES IN VERSION 1.11.2
+-------------------------
+
+  o Updated functions to build Gene Ontology genesets for human, mouse, rat, and fly.
+
+    o Enforce minimum geneset size of 10.
+
+    o Include code for roxygen2 documentation blocks to be placed in R/data.R.
+
+  o Updated documentation to include package version numbers and build dates.
+
+CHANGES IN VERSION 1.11.1
+-------------------------
+
+  o Added locus definitions for hg38, rn5, rn6, and dm6.
+
+  o All genomes have the following locus definitions:
+
+    o nearest_tss, nearest_gene, exon, intron, 1kb, 5kb, 10kb, 1kb_outside_upstream,
+      5kb_outside_upstream, 10kb_outside_upstream, 1kb_outside, 5kb_outside, and
+      10kb_outside.
+
+  o Internal changes to LocusDefinition class
+
+    o Remove chrom2iranges representation in favor of granges
+
+    o mcols for granges representation are 'gene_id' (formerly names) and 'symbol'
+
+    o Including gene symbols in the LocusDefinition allows removal of genes.*.RData
+
+  o Internal changes to tss.*.RData objects
+
+    o These are now GRanges instead of a list with different representations
+
+  o Code to use to construct LocusDefinition and tss RData objects are in data-raw/
+    which is viewable in the package source.
+
 CHANGES IN VERSION 1.1.4
 ------------------------
 

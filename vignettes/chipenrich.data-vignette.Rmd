@@ -1,0 +1,78 @@
+---
+title: "chipenrich.data"
+author: "Ryan P. Welch, Chee Lee, Raymond G. Cavalcante, Chris Lee, Laura J. Scott, Maureen A. Sartor"
+date: "`r Sys.Date()`"
+output:
+  BiocStyle::html_document
+vignette: >
+  %\VignetteIndexEntry{chipenrich.data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+The `chipenrich.data` package is the companion to [`chipenrich`](http://bioconductor.org/packages/chipenrich). It contains the following, which are necessary for gene set enrichment with `chipenrich`:
+
+# Locus definitions
+`chipenrich::supported_locusdefs()` lists all available locus definitions for `chipenrich::supported_genomes()`.
+
+The `LocusDefinition` class has the following definition:
+
+```{r, eval=FALSE}
+methods::setClass("LocusDefinition", methods::representation(
+  dframe = "data.frame",
+  granges = "GRanges",
+  genome.build = "character",
+  organism = "character"
+),
+  package = "chipenrich.data"
+);
+```
+
+* `nearest_tss`: The locus is the region spanning the midpoints between the TSSs of adjacent genes.
+* `nearest_gene`: The locus is the region spanning the midpoints between the boundaries of each gene, where a gene is defined as the region between the furthest upstream TSS and furthest downstream TES for that gene. If two gene loci overlap each other, we take the midpoint of the overlap as the boundary between the two loci. When a gene locus is completely nested within another, we create a disjoint set of 3 intervals, where the outermost gene is separated into 2 intervals broken apart at the endpoints of the nested gene.
+* `1kb`: The locus is the region within 1kb of any of the TSSs belonging to a gene. If TSSs from two adjacent genes are within 2 kb of each other, we use the midpoint between the two TSSs as the boundary for the locus for each gene.
+* `1kb_outside_upstream`: The locus is the region more than 1kb upstream from a TSS to the midpoint between the adjacent TSS.
+* `1kb_outside`: The locus is the region more than 1kb upstream or downstream from a TSS to the midpoint between the adjacent TSS.
+* `5kb`: The locus is the region within 5kb of any of the TSSs belonging to a gene. If TSSs from two adjacent genes are within 10 kb of each other, we use the midpoint between the two TSSs as the boundary for the locus for each gene.
+* `5kb_outside_upstream`: The locus is the region more than 5kb upstream from a TSS to the midpoint between the adjacent TSS.
+* `5kb_outside`: The locus is the region more than 5kb upstream or downstream from a TSS to the midpoint between the adjacent TSS.
+* `10kb`: The locus is the region within 10kb of any of the TSSs belonging to a gene. If TSSs from two adjacent genes are within 20 kb of each other, we use the midpoint between the two TSSs as the boundary for the locus for each gene.
+* `10kb_outside_upstream`: The locus is the region more than 10kb upstream from a TSS to the midpoint between the adjacent TSS.
+* `10kb_outside`: The locus is the region more than 10kb upstream or downstream from a TSS to the midpoint between the adjacent TSS.
+* `exon`: Each gene has multiple loci corresponding to its exons. Overlaps between different genes are allowed.
+* `intron`: Each gene has multiple loci corresponding to its introns. Overlaps between different genes are allowed.
+
+# Genesets
+`chipenrich::supported_genesets()` lists all available genesets for `chipenrich::supported_genomes()`.
+
+The `GeneSet` class has the following definition:
+
+```{r, eval=FALSE}
+# S4 class for storing genesets.
+methods::setClass("GeneSet",representation(
+  set.gene = "environment",
+  type = "character",
+  set.name = "environment",
+  all.genes = "character",
+  organism = "character",
+  dburl = "character"
+), methods::prototype(
+  set.gene = new.env(parent=emptyenv()),
+  type = "",
+  set.name = new.env(parent=emptyenv()),
+  all.genes = "",
+  organism = "",
+  dburl = ""
+),
+  package = "chipenrich.data"
+)
+```
+
+# TSS data
+The TSS objects are used to create QC plots in `chipenrich()` giving the distribution of peak distances to TSSs. TSS objects are `GRanges` with `mcols` for `gene_id` (Entrez Gene ID) and `symbol` (gene symbols).
+
+# Mappability data
+`chipenrich::supported_supported_read_lengths()` lists the available mappability data. The mappability data is a `data.frame` with columns `geneid` and `mappa`. We define base pair mappability as the average read mappability of all possible reads of size K that encompass a specific base pair location, $b$.
+
+# Example data for `chipenrich`
+We include two example peak sets, `peaks_E2F4` and `peaks_H3K4me3_GM12878`, both for genome hg19.
