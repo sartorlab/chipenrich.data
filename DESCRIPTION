@@ -1,7 +1,7 @@
 Package: chipenrich.data
 Title: What the Package Does (one line, title case)
-Version: 1.11.3
-Date: 2017-03-19
+Version: 1.11.4
+Date: 2017-03-22
 Authors@R: c(
 	person(c("Ryan P."),"Welch",role = c("aut","cph"),email = "welchr@umich.edu"),
 	person("Chee","Lee",role = c("aut"),email = "cheelee@umich.edu"),
@@ -20,7 +20,8 @@ Imports:
 	IRanges,
 	readr,
 	rtracklayer,
-	S4Vectors
+	S4Vectors,
+	utils
 License: GPL-3
 Encoding: UTF-8
 LazyData: true

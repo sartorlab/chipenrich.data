@@ -14,4 +14,5 @@
 #' @import readr
 #' @import rtracklayer
 #' @import S4Vectors
+#' @importFrom utils data
 NULL
