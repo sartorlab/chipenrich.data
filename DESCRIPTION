@@ -1,7 +1,7 @@
 Package: chipenrich.data
 Title: What the Package Does (one line, title case)
-Version: 1.11.4
-Date: 2017-03-22
+Version: 1.11.6
+Date: 2017-03-27
 Authors@R: c(
 	person(c("Ryan P."),"Welch",role = c("aut","cph"),email = "welchr@umich.edu"),
 	person("Chee","Lee",role = c("aut"),email = "cheelee@umich.edu"),
@@ -26,8 +26,11 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Suggests:
+	BiocStyle,
+	devtools,
     knitr,
     rmarkdown,
+	roxygen2,
     testthat,
 	GO.db,
 	KEGG.db,

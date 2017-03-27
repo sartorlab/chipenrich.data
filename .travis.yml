@@ -1,0 +1,16 @@
+# Sample .travis.yml for R projects
+
+language: r
+r:
+  - devel
+sudo: false
+cache: packages
+bioc_required: true
+
+warnings_are_errors: false
+
+notifications:
+  email:
+    on_success: change
+    on_failure: change
+  slack: sartorlab:4w0WizEO7JwnnWqBgt1mC2l6

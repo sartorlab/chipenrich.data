@@ -1,3 +1,13 @@
+CHANGES IN VERSION 1.11.5
+-------------------------
+
+  o Include Travis builds.
+
+CHANGES IN VERSION 1.11.4
+-------------------------
+
+  o Internal changes to sync Bioc and GitHub repos.
+
 CHANGES IN VERSION 1.11.3
 -------------------------
 
