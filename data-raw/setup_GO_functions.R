@@ -4,7 +4,7 @@ get_package_version = function(package_name) {
 	return(version_str)
 }
 
-build_GO_genesets = function(org_code = c('Dm','Hs','Mm','Rn'), min_geneset_size = 10) {
+build_GO_genesets = function(org_code = c('Dm','Dr','Hs','Mm','Rn'), min_geneset_size = 10) {
 	org_code = match.arg(org_code)
 
 	if(org_code == 'Dm') {
@@ -15,6 +15,8 @@ build_GO_genesets = function(org_code = c('Dm','Hs','Mm','Rn'), min_geneset_size
 		org = 'mmu'
 	} else if (org_code == 'Rn') {
 		org = 'rno'
+	} else if (org_code == 'Dr') {
+		org = 'dre'
 	}
 
 	message(sprintf('On %s...', org_code))

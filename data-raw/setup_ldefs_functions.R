@@ -381,8 +381,11 @@ subject_preceding_x = function(x, subject) {
     # This prevents genes that start or end at the chromosome boundary from causing problems
     x_overlaps_start = findOverlaps(x, gr_chr_start, ignore.strand = TRUE)
     if(length(x_overlaps_start) > 0) {
-        start(x)[queryHits(x_overlaps_start)] = start(x)[queryHits(x_overlaps_start)] + 5
+		# The order here matters because if we're something from the beginning,
+		# of a chromosome, we have to move the end before the start so that
+		# the result isn't a range of negative length. (Discovered for Zebrafish).
         end(x)[queryHits(x_overlaps_start)] = end(x)[queryHits(x_overlaps_start)] + 5
+        start(x)[queryHits(x_overlaps_start)] = start(x)[queryHits(x_overlaps_start)] + 5
     }
 
     # Add start ranges to subject so there are no NAs in follow()
@@ -1202,7 +1205,21 @@ build_locus_definitions = function(genome) {
         orgdb_version = get_package_version('org.Dm.eg.db')
 		gencode_version = NULL
 		mapping_version = NULL
-    } else {
+    } else if (genome == 'danRer10') {
+		require(TxDb.Drerio.UCSC.danRer10.refGene)
+		require(org.Dr.eg.db)
+		txdb = TxDb.Drerio.UCSC.danRer10.refGene
+		egSYMBOL = org.Dr.egSYMBOL
+		egENSEMBL2EG = NULL
+		egGENENAME = org.Dr.egGENENAME
+		gencode_url = NULL
+		mapping_url = NULL
+		organism = 'Danio rerio'
+		txdb_version = get_package_version('TxDb.Drerio.UCSC.danRer10.refGene')
+		orgdb_version = get_package_version('org.Dr.eg.db')
+		gencode_version = NULL
+		mapping_version = NULL
+	} else {
         stop('Select a valid genome')
     }
 

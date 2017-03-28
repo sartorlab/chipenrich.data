@@ -2327,3 +2327,291 @@
 #' @source http://www.reactome.org/download/current/NCBI2Reactome_All_Levels.txt downloaded on 2017-03-19
 "geneset.reactome.dme"
 
+#' tss.danRer10 TSS locations
+#'
+#' A \code{GRanges} with all the TSSs for danRer10. Primarily used in the \code{assign_peaks()} function to report distance of a peak to the nearest TSS. Also used to build the QC plot with distribution of peaks to TSSs.
+#'
+#' @format A \code{GRanges} object with the following \code{mcols}:
+#' \describe{
+#'     \item{gene_id}{The Entrez ID for the TSS}
+#'     \item{symbol}{The gene symbol for the TSS}
+#' }
+#' @source R packages: TxDb.Drerio.UCSC.danRer10.refGene_3.4.0 and org.Dr.eg.db_3.4.0.
+"tss.danRer10"
+
+#' locusdef.danRer10.nearest_tss locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined as the region spanning the midpoints between adjacent TSSs.
+#'
+#' Built on Tue Mar 28 12:56:02 2017.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, danRer10.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Danio rerio.}
+#' }
+#' @source R packages: TxDb.Drerio.UCSC.danRer10.refGene_3.4.0 and org.Dr.eg.db_3.4.0.
+"locusdef.danRer10.nearest_tss"
+
+#' locusdef.danRer10.nearest_gene locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined as the region spanning the midpoints between adjacent TSSs and TESs.
+#'
+#' Built on Tue Mar 28 12:56:02 2017.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, danRer10.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Danio rerio.}
+#' }
+#' @source R packages: TxDb.Drerio.UCSC.danRer10.refGene_3.4.0 and org.Dr.eg.db_3.4.0.
+"locusdef.danRer10.nearest_gene"
+
+#' locusdef.danRer10.exon locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined as the exons belonging to genes.
+#'
+#' Built on Tue Mar 28 12:56:04 2017.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, danRer10.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Danio rerio.}
+#' }
+#' @source R packages: TxDb.Drerio.UCSC.danRer10.refGene_3.4.0 and org.Dr.eg.db_3.4.0.
+"locusdef.danRer10.exon"
+
+#' locusdef.danRer10.intron locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined as the introns belonging to genes.
+#'
+#' Built on Tue Mar 28 12:56:06 2017.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, danRer10.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Danio rerio.}
+#' }
+#' @source R packages: TxDb.Drerio.UCSC.danRer10.refGene_3.4.0 and org.Dr.eg.db_3.4.0.
+"locusdef.danRer10.intron"
+
+#' locusdef.danRer10.1kb locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined within 1kb upstream and downstream of the TSS.
+#'
+#' Built on Tue Mar 28 12:56:06 2017.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, danRer10.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Danio rerio.}
+#' }
+#' @source R packages: TxDb.Drerio.UCSC.danRer10.refGene_3.4.0 and org.Dr.eg.db_3.4.0.
+"locusdef.danRer10.1kb"
+
+#' locusdef.danRer10.1kb_outside_upstream locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined as the region beyond 1kb upstream of the TSS and bounded by the midpoint between the TSS and the next upstream TSS.
+#'
+#' Built on Tue Mar 28 12:56:06 2017.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, danRer10.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Danio rerio.}
+#' }
+#' @source R packages: TxDb.Drerio.UCSC.danRer10.refGene_3.4.0 and org.Dr.eg.db_3.4.0.
+"locusdef.danRer10.1kb_outside_upstream"
+
+#' locusdef.danRer10.1kb_outside locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined as the region beyond 1kb upstream and downstream of the TSS and bounded by the midpoints between the TSS and the next upstream and downstream TSSs.
+#'
+#' Built on Tue Mar 28 12:56:07 2017.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, danRer10.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Danio rerio.}
+#' }
+#' @source R packages: TxDb.Drerio.UCSC.danRer10.refGene_3.4.0 and org.Dr.eg.db_3.4.0.
+"locusdef.danRer10.1kb_outside"
+
+#' locusdef.danRer10.5kb locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined within 5kb upstream and downstream of the TSS.
+#'
+#' Built on Tue Mar 28 12:56:07 2017.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, danRer10.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Danio rerio.}
+#' }
+#' @source R packages: TxDb.Drerio.UCSC.danRer10.refGene_3.4.0 and org.Dr.eg.db_3.4.0.
+"locusdef.danRer10.5kb"
+
+#' locusdef.danRer10.5kb_outside_upstream locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined as the region beyond 5kb upstream of the TSS and bounded by the midpoint between the TSS and the next upstream TSS.
+#'
+#' Built on Tue Mar 28 12:56:07 2017.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, danRer10.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Danio rerio.}
+#' }
+#' @source R packages: TxDb.Drerio.UCSC.danRer10.refGene_3.4.0 and org.Dr.eg.db_3.4.0.
+"locusdef.danRer10.5kb_outside_upstream"
+
+#' locusdef.danRer10.5kb_outside locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined as the region beyond 5kb upstream and downstream of the TSS and bounded by the midpoints between the TSS and the next upstream and downstream TSSs.
+#'
+#' Built on Tue Mar 28 12:56:08 2017.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, danRer10.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Danio rerio.}
+#' }
+#' @source R packages: TxDb.Drerio.UCSC.danRer10.refGene_3.4.0 and org.Dr.eg.db_3.4.0.
+"locusdef.danRer10.5kb_outside"
+
+#' locusdef.danRer10.10kb locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined within 10kb upstream and downstream of the TSS.
+#'
+#' Built on Tue Mar 28 12:56:08 2017.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, danRer10.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Danio rerio.}
+#' }
+#' @source R packages: TxDb.Drerio.UCSC.danRer10.refGene_3.4.0 and org.Dr.eg.db_3.4.0.
+"locusdef.danRer10.10kb"
+
+#' locusdef.danRer10.10kb_outside_upstream locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined as the region beyond 10kb upstream of the TSS and bounded by the midpoint between the TSS and the next upstream TSS.
+#'
+#' Built on Tue Mar 28 12:56:08 2017.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, danRer10.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Danio rerio.}
+#' }
+#' @source R packages: TxDb.Drerio.UCSC.danRer10.refGene_3.4.0 and org.Dr.eg.db_3.4.0.
+"locusdef.danRer10.10kb_outside_upstream"
+
+#' locusdef.danRer10.10kb_outside locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined as the region beyond 10kb upstream and downstream of the TSS and bounded by the midpoints between the TSS and the next upstream and downstream TSSs.
+#'
+#' Built on Tue Mar 28 12:56:09 2017.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, danRer10.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Danio rerio.}
+#' }
+#' @source R packages: TxDb.Drerio.UCSC.danRer10.refGene_3.4.0 and org.Dr.eg.db_3.4.0.
+"locusdef.danRer10.10kb_outside"
+
+#' geneset.GOBP.dre genesets for Danio rerio
+#'
+#' Gene Ontology Biological Process (GOBP) genesets for Danio rerio. All genesets are required to have >= 10 Entrez IDs.
+#' Built on Tue Mar 28 12:58:30 2017.
+#'
+#' @format A \code{GeneSet} object with the following slots:
+#' \describe{
+#'     \item{type}{A \code{character} indicating the type of genesets, e.g. GOBP.}
+#'     \item{dburl}{A \code{character} of the URL of the database underlying the genesets.}
+#'     \item{organism}{A \code{character} of the organism, e.g. Homo sapiens.}
+#'     \item{set.gene}{An \code{environment} containing a \code{list} whose keys are database specific accessions (e.g. GO IDs for GO terms), and whose elements are \code{character} vectors of Entrez Gene IDs.}
+#'     \item{all.genes}{A \code{character} vector of all the Entrez Gene IDs contained over all the genesets in this \code{type}.}
+#'     \item{set.name}{An \code{environment} containing a \code{list} whose keys are database specific accessions, and whose elements are human readable geneset names.}
+#' }
+#' @source org.Dr.eg.db_3.4.0 and GO.db_3.4.0
+"geneset.GOBP.dre"
+
+#' geneset.GOCC.dre genesets for Danio rerio
+#'
+#' Gene Ontology Cellular Component (GOCC) genesets for Danio rerio. All genesets are required to have >= 10 Entrez IDs.
+#' Built on Tue Mar 28 12:58:30 2017.
+#'
+#' @format A \code{GeneSet} object with the following slots:
+#' \describe{
+#'     \item{type}{A \code{character} indicating the type of genesets, e.g. GOBP.}
+#'     \item{dburl}{A \code{character} of the URL of the database underlying the genesets.}
+#'     \item{organism}{A \code{character} of the organism, e.g. Homo sapiens.}
+#'     \item{set.gene}{An \code{environment} containing a \code{list} whose keys are database specific accessions (e.g. GO IDs for GO terms), and whose elements are \code{character} vectors of Entrez Gene IDs.}
+#'     \item{all.genes}{A \code{character} vector of all the Entrez Gene IDs contained over all the genesets in this \code{type}.}
+#'     \item{set.name}{An \code{environment} containing a \code{list} whose keys are database specific accessions, and whose elements are human readable geneset names.}
+#' }
+#' @source org.Dr.eg.db_3.4.0 and GO.db_3.4.0
+"geneset.GOCC.dre"
+
+#' geneset.GOMF.dre genesets for Danio rerio
+#'
+#' Gene Ontology Molecular Function (GOMF) genesets for Danio rerio. All genesets are required to have >= 10 Entrez IDs.
+#' Built on Tue Mar 28 12:58:30 2017.
+#'
+#' @format A \code{GeneSet} object with the following slots:
+#' \describe{
+#'     \item{type}{A \code{character} indicating the type of genesets, e.g. GOBP.}
+#'     \item{dburl}{A \code{character} of the URL of the database underlying the genesets.}
+#'     \item{organism}{A \code{character} of the organism, e.g. Homo sapiens.}
+#'     \item{set.gene}{An \code{environment} containing a \code{list} whose keys are database specific accessions (e.g. GO IDs for GO terms), and whose elements are \code{character} vectors of Entrez Gene IDs.}
+#'     \item{all.genes}{A \code{character} vector of all the Entrez Gene IDs contained over all the genesets in this \code{type}.}
+#'     \item{set.name}{An \code{environment} containing a \code{list} whose keys are database specific accessions, and whose elements are human readable geneset names.}
+#' }
+#' @source org.Dr.eg.db_3.4.0 and GO.db_3.4.0
+"geneset.GOMF.dre"
+
+#' geneset.reactome.dre genesets for Danio rerio
+#'
+#' Reactome genesets for Danio rerio. All genesets are required to have >= 10 Entrez IDs.
+#' Built on Tue Mar 28 13:03:21 2017.
+#'
+#' @format A \code{GeneSet} object with the following slots:
+#' \describe{
+#'     \item{type}{A \code{character} indicating the type of genesets, e.g. Reactome.}
+#'     \item{dburl}{A \code{character} of the URL of the database underlying the genesets.}
+#'     \item{organism}{A \code{character} of the organism, e.g. Homo sapiens.}
+#'     \item{set.gene}{An \code{environment} containing a \code{list} whose keys are database specific accessions (e.g. R-HSA-109688), and whose elements are \code{character} vectors of Entrez Gene IDs.}
+#'     \item{all.genes}{A \code{character} vector of all the Entrez Gene IDs contained over all the genesets in this \code{type}.}
+#'     \item{set.name}{An \code{environment} containing a \code{list} whose keys are database specific accessions, and whose elements are human readable geneset names.}
+#' }
+#' @source http://www.reactome.org/download/current/NCBI2Reactome_All_Levels.txt downloaded on 2017-03-19
+"geneset.reactome.dre"
+

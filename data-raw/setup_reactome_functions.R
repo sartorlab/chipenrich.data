@@ -6,7 +6,7 @@
 #' @param min_geneset_size An \code{integer} indicating the minimum size for a gene set
 #'
 #' @return A \code{GeneSet} object representing the Reactome pathways for the particular \code{org_code}.
-build_reactome_genesets = function(org_code = c('Dm','Hs','Mm','Rn'), min_geneset_size = 10) {
+build_reactome_genesets = function(org_code = c('Dm','Dr','Hs','Mm','Rn'), min_geneset_size = 10) {
     org_code = match.arg(org_code)
 
 ### {Code bounded needs to be changed per geneset type
@@ -22,6 +22,9 @@ build_reactome_genesets = function(org_code = c('Dm','Hs','Mm','Rn'), min_genese
     if(org_code == 'Dm') {
         org = 'dme'
         org_name = 'Drosophila melanogaster'
+    } else if (org_code == 'Dr') {
+        org = 'dre'
+        org_name = 'Danio rerio'
     } else if (org_code == 'Hs') {
         org = 'hsa'
         org_name = 'Homo sapiens'
