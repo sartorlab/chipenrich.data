@@ -1,7 +1,7 @@
 Package: chipenrich.data
 Title: What the Package Does (one line, title case)
-Version: 1.11.7
-Date: 2017-03-28
+Version: 1.99.7
+Date: 2017-04-01
 Authors@R: c(
 	person(c("Ryan P."),"Welch",role = c("aut","cph"),email = "welchr@umich.edu"),
 	person("Chee","Lee",role = c("aut"),email = "cheelee@umich.edu"),
