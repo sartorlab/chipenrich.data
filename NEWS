@@ -1,161 +1,155 @@
-CHANGES IN VERSION 1.11.5
--------------------------
-
-  o Include Travis builds.
-
-CHANGES IN VERSION 1.11.4
--------------------------
-
-  o Internal changes to sync Bioc and GitHub repos.
-
-CHANGES IN VERSION 1.11.3
--------------------------
-
-  o Added http://www.reactome.org/download/current/NCBI2Reactome_All_Levels.txt
-    to data-raw/ to build Reactome genesets. (Downloaded 2017-03-19)
-
-  o Added functions to build Reactome genesets for human, mouse, rat, and fly.
-
-    o Fly Reactome genesets are new, and the others are updated.
-
-  o Some documentation typo fixes.
-
-CHANGES IN VERSION 1.11.2
--------------------------
-
-  o Updated functions to build Gene Ontology genesets for human, mouse, rat, and fly.
-
-    o Enforce minimum geneset size of 10.
-
-    o Include code for roxygen2 documentation blocks to be placed in R/data.R.
-
-  o Updated documentation to include package version numbers and build dates.
-
-CHANGES IN VERSION 1.11.1
--------------------------
-
-  o Added locus definitions for hg38, rn5, rn6, and dm6.
-
-  o All genomes have the following locus definitions:
-
-    o nearest_tss, nearest_gene, exon, intron, 1kb, 5kb, 10kb, 1kb_outside_upstream,
-      5kb_outside_upstream, 10kb_outside_upstream, 1kb_outside, 5kb_outside, and
-      10kb_outside.
-
-  o Internal changes to LocusDefinition class
-
-    o Remove chrom2iranges representation in favor of granges
-
-    o mcols for granges representation are 'gene_id' (formerly names) and 'symbol'
-
-    o Including gene symbols in the LocusDefinition allows removal of genes.*.RData
-
-  o Internal changes to tss.*.RData objects
-
-    o These are now GRanges instead of a list with different representations
-
-  o Code to use to construct LocusDefinition and tss RData objects are in data-raw/
-    which is viewable in the package source.
-
-CHANGES IN VERSION 1.1.4
+CHANGES IN VERSION 2.0.0
 ------------------------
 
-  o Support for D. melanogaster genome (dm3)
+NEW FEATURES
 
-  o All genomes (dm3, hg19, mm9, mm10, and rn4) have the following locus definitions
-    o 1kb, 5kb, 10kb, >10kb, introns, exons, nearest_gene, and nearest_tss
+    o Added locus definitions for danRer10 (zebrafish), dm6, hg38, rn5, and rn6.
 
-  o New example histone data set, peaks_H3K4me3_GM12878, based on hg19.
+    o All genomes have the following locus definitions: nearest_tss, nearest_gene,
+      exon, intron, 1kb, 5kb, 10kb, 1kb_outside_upstream, 5kb_outside_upstream,
+      10kb_outside_upstream, 1kb_outside, 5kb_outside, and 10kb_outside.
 
-  o New gene sets from Reactome for human, mouse, and rat.
+    o Added Reactome genesets for fly.
+
+    o Added GO and Reactome genesets for zebrafish.
+
+SIGNIFICANT USER-LEVEL CHANGES
+
+    o GO and Reactome gene sets are based on the most up to date data from orgDb
+      and Reactome, respectively.
+
+    o Changes to LocusDefinition class.
+
+        o mcols for granges representation are 'gene_id' (formerly names) and 'symbol'
+
+        o Including gene symbols in the LocusDefinition allows removal of genes.*.RData
+
+    o Changes to tss.*.RData objects
+
+        o Now GRanges instead of a list with different representations.
+
+    o Use roxygen2 to build LocusDefinition, GeneSet, and tss documentation.
+
+    o Documentation for rebuilt objects in data/ include packages / sources
+      used and version numbers.
+
+SIGNIFICANT BACKEND CHANGES
+
+    o Use data-raw/ to store code for building LocusDefinition, GeneSet, and tss
+      objects that are stored as RData in data/.
+
+    o Use data-raw/ to store any data needed for GeneSet objects.
+
+DEPRECATED AND DEFUNCT
+
+    o Removed the chrom2iranges representation from the LocusDefinition class.
+
+BUG FIXES
+
+CHANGES IN VERSION 1.2.0
+------------------------
+
+NEW FEATURES
+
+    o Support for D. melanogaster genome (dm3)
+
+    o All genomes (dm3, hg19, mm9, mm10, and rn4) have the following locus definitions
+      o 1kb, 5kb, 10kb, >10kb, introns, exons, nearest_gene, and nearest_tss
+
+    o New example histone data set, peaks_H3K4me3_GM12878, based on hg19.
+
+    o New gene sets from Reactome for human, mouse, and rat.
 
 CHANGES IN VERSION 1.0
 ----------------------
 
 PKG FEATURES
 
-  o Supporting package containing data for use with the chipenrich package.
+    o Supporting package containing data for use with the chipenrich package.
 
-  o Contains genesets for many databases including Biocarta, KEGG, OMIM, etc.
+    o Contains genesets for many databases including Biocarta, KEGG, OMIM, etc.
 
-  o Contains gene locus definitions (for assigning ChIP-seq peaks to genes)
+    o Contains gene locus definitions (for assigning ChIP-seq peaks to genes)
 
-  o Contains mappability estimates for each gene locus definition
+    o Contains mappability estimates for each gene locus definition
 
-  o Example ChIP-seq peak datasets
+    o Example ChIP-seq peak datasets
 
 CHANGES IN VERSION 0.99.3
 -------------------------
 
 NEW FEATURES
 
-  o Locus definitions for mm10
+    o Locus definitions for mm10
 
 BUG FIXES
 
-  o Mouse mappability gene IDs were incorrect for some locus definitions and
-    would cause a crash if used
+    o Mouse mappability gene IDs were incorrect for some locus definitions and
+      would cause a crash if used
 
 CHANGES IN VERSION 0.99.2
 -------------------------
 
 USER-VISIBLE CHANGES
 
-  o Updated to switch from Depends: to Imports: per bioconductor guidelines
-  o Updated license to GPL-3
-  o Updated NEWS format per bioconductor guidelines
-  o Made several man pages runnable (removed donttest)
+    o Updated to switch from Depends: to Imports: per bioconductor guidelines
+
+    o Updated license to GPL-3
+
+    o Updated NEWS format per bioconductor guidelines
+
+    o Made several man pages runnable (removed donttest)
 
 CHANGES IN VERSION 0.99.1
 -------------------------
 
 USER-VISIBLE CHANGES
 
-  o Minor updates to documentation and DESCRIPTION
+    o Minor updates to documentation and DESCRIPTION
 
 CHANGES IN VERSION 0.99.0
 -------------------------
 
 NEW FEATURES
 
-  o Initial submission to bioconductor
+    o Initial submission to bioconductor
 
 CHANGES IN VERSION 0.4.4
 ------------------------
 
 USER-VISIBLE CHANGES
 
-  o Updated 1kb/5kb locus definitions using new code
+    o Updated 1kb/5kb locus definitions using new code
 
 CHANGES IN VERSION 0.4.3
 ------------------------
 
 BUG FIXES
 
-  o Fixed 1kb/5kb locus definitions (they were previously the same by accident!)
+    o Fixed 1kb/5kb locus definitions (they were previously the same by accident!)
 
 CHANGES IN VERSION 0.4.2
 ------------------------
 
 NEW FEATURES
 
-  o Added support for rat (locus definitions, gene sets from GO and ConceptGen/LRpath)
+    o Added support for rat (locus definitions, gene sets from GO and ConceptGen/LRpath)
 
 BUG FIXES
 
-  o Fixed nearest gene mappabilities for human and mouse
+    o Fixed nearest gene mappabilities for human and mouse
 
 CHANGES IN VERSION 0.4.1
 ------------------------
 
 USER-VISIBLE CHANGES
 
-  o Changed TSSs to come from knownGenes instead of refFlat
+    o Changed TSSs to come from knownGenes instead of refFlat
 
 CHANGES IN VERSION 0.4
 ----------------------
 
 USER-VISIBLE CHANGES
 
-  o Changed format of TSS object to include strand information
-  o Updated cytoband to use Bioconductor (org.Mm.eg.db) for mouse
+    o Changed format of TSS object to include strand information
+    o Updated cytoband to use Bioconductor (org.Mm.eg.db) for mouse
