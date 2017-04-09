@@ -1,7 +1,7 @@
 Package: chipenrich.data
 Title: Companion package to chipenrich
-Version: 1.99.8
-Date: 2017-04-01
+Version: 1.99.9
+Date: 2017-04-09
 Authors@R: c(
 	person(c("Ryan P."),"Welch",role = c("aut","cph"),email = "welchr@umich.edu"),
 	person("Chee","Lee",role = c("aut"),email = "cheelee@umich.edu"),
@@ -33,13 +33,14 @@ Suggests:
 	roxygen2,
     testthat,
 	GO.db,
-	KEGG.db,
 	org.Dm.eg.db,
+	org.Dr.eg.db,
 	org.Hs.eg.db,
 	org.Mm.eg.db,
 	org.Rn.eg.db,
 	TxDb.Dmelanogaster.UCSC.dm3.ensGene,
 	TxDb.Dmelanogaster.UCSC.dm6.ensGene,
+	TxDb.Drerio.UCSC.danRer10.refGene,
 	TxDb.Hsapiens.UCSC.hg19.knownGene,
 	TxDb.Hsapiens.UCSC.hg38.knownGene,
 	TxDb.Mmusculus.UCSC.mm9.knownGene,
