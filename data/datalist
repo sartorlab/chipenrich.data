@@ -17,6 +17,7 @@ geneset.biocarta_pathway.hsa
 geneset.biocarta_pathway.mmu
 geneset.biocarta_pathway.rno
 geneset.cytoband.hsa
+geneset.ctd.hsa
 geneset.drug_bank.hsa
 geneset.drug_bank.mmu
 geneset.drug_bank.rno
@@ -25,6 +26,8 @@ geneset.ehmn_pathway_gene.mmu
 geneset.ehmn_pathway_gene.rno
 geneset.gene_expression.hsa
 geneset.gene_expression.mmu
+geneset.hallmark.hsa
+geneset.immunologic.hsa
 geneset.kegg_pathway.hsa
 geneset.kegg_pathway.mmu
 geneset.kegg_pathway.rno
@@ -34,9 +37,11 @@ geneset.mesh.rno
 geneset.metabolite.hsa
 geneset.metabolite.mmu
 geneset.metabolite.rno
+geneset.microrna.hsa
 geneset.mirbase.hsa
 geneset.mirbase.mmu
 geneset.mirbase.rno
+geneset.oncogenic.hsa
 geneset.panther_pathway.hsa
 geneset.panther_pathway.mmu
 geneset.panther_pathway.rno

@@ -15,23 +15,21 @@ peaks_H3K4me3_GM12878
 }
 
 \format{
-  A data frame containing 57,476 peak binding locations. Each row is a peak location, and the 3 variables/columns are chromosome, start peak coordinate, and end peak coordinate. 
-	Peak coordinates are in hg19 (UCSC) coordinates. 
+  A data frame containing 57,476 peak binding locations. Each row is a peak location, and the 3 variables/columns are chromosome, start peak coordinate, and end peak coordinate.
+	Peak coordinates are in hg19 (UCSC) coordinates.
 }
 
 \source{
-  The data and information regarding the experiment can be found at the following ENCODE URL: 
-	
+  The data and information regarding the experiment can be found at the following ENCODE URL:
+
 	http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k04me3StdPkV2.broadPeak.gz
 }
 
 \examples{
-library(chipenrich.data)
-
 # Load H3K4me3 in GM12878 peak data. 
 data(peaks_H3K4me3_GM12878)
 
-# Print the first 10 peaks in the dataset. 
+# Print the first 10 peaks in the dataset.
 print(head(peaks_H3K4me3_GM12878))
 }
 \keyword{datasets}

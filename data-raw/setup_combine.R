@@ -1,0 +1,13 @@
+source('data-raw/setup_combine_functions.R')
+devtools::load_all()
+
+build_combine(type = c('BioCarta'), org_code = c('Hs'), min_geneset_size = 10)
+build_combine(type = c('CTD'), org_code = c('Hs'), min_geneset_size = 10)
+build_combine(type = c('DrugBank'), org_code = c('Hs'), min_geneset_size = 10)
+build_combine(type = c('Hallmark'), org_code = c('Hs'), min_geneset_size = 10)
+build_combine(type = c('Immunologic'), org_code = c('Hs'), min_geneset_size = 10)
+build_combine(type = c('KEGG'), org_code = c('Hs'), min_geneset_size = 10)
+build_combine(type = c('MicroRNA'), org_code = c('Hs'), min_geneset_size = 10)
+build_combine(type = c('Oncogenic'), org_code = c('Hs'), min_geneset_size = 10)
+build_combine(type = c('pfam'), org_code = c('Hs'), min_geneset_size = 10)
+build_combine(type = c('TF'), org_code = c('Hs'), min_geneset_size = 10)

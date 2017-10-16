@@ -14,13 +14,13 @@
     \item{set.name}{An \code{environment} containing a \code{list} whose keys are database specific accessions, and whose elements are human readable geneset names.}
 }}
 \source{
-org.Mm.eg.db_3.4.0 and GO.db_3.4.0
+org.Mm.eg.db_3.4.2 and GO.db_3.4.2
 }
 \usage{
 geneset.GOMF.mmu
 }
 \description{
 Gene Ontology Molecular Function (GOMF) genesets for Mus musculus. All genesets are required to have >= 10 Entrez IDs.
-Built on Mon Mar 20 13:45:24 2017.
+Built on Mon Oct 16 16:23:23 2017.
 }
 \keyword{datasets}

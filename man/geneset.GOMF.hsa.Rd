@@ -14,13 +14,13 @@
     \item{set.name}{An \code{environment} containing a \code{list} whose keys are database specific accessions, and whose elements are human readable geneset names.}
 }}
 \source{
-org.Hs.eg.db_3.4.0 and GO.db_3.4.0
+org.Hs.eg.db_3.4.2 and GO.db_3.4.2
 }
 \usage{
 geneset.GOMF.hsa
 }
 \description{
 Gene Ontology Molecular Function (GOMF) genesets for Homo sapiens. All genesets are required to have >= 10 Entrez IDs.
-Built on Mon Mar 20 13:44:28 2017.
+Built on Mon Oct 16 16:22:22 2017.
 }
 \keyword{datasets}

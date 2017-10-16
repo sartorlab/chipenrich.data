@@ -31,8 +31,6 @@ Not typically accessed by the user - this is used internally by the \code{chipen
 }
 
 \examples{
-library(chipenrich.data)
-
 # Show info about the class.
 showClass("LocusDefinition");
 

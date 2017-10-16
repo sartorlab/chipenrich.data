@@ -1,7 +1,7 @@
 Package: chipenrich.data
 Title: Companion package to chipenrich
-Version: 2.1.0
-Date: 2017-04-09
+Version: 2.1.1
+Date: 2017-10-16
 Authors@R: c(
 	person(c("Ryan P."),"Welch",role = c("aut","cph"),email = "welchr@umich.edu"),
 	person("Chee","Lee",role = c("aut"),email = "cheelee@umich.edu"),
@@ -9,8 +9,9 @@ Authors@R: c(
 	person(c("Laura J."),"Scott",role = c("ths"), email = "ljst@umich.edu"),
 	person(c("Maureen A."),"Sartor",role = c("ths"),email = "sartorma@med.umich.edu"))
 Description: Supporting data for the chipenrich package. Includes pre-defined gene sets, gene locus definitions, and mappability estimates.
+biocViews: ChIPSeq, Epigenetics, FunctionalGenomics, GeneSetEnrichment, HistoneModification, Regression
 Depends:
-    R (>= 3.3.0)
+    R (>= 3.4.0)
 Imports:
 	AnnotationDbi,
 	BiocGenerics,

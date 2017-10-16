@@ -14,13 +14,13 @@
     \item{set.name}{An \code{environment} containing a \code{list} whose keys are database specific accessions, and whose elements are human readable geneset names.}
 }}
 \source{
-org.Dm.eg.db_3.4.0 and GO.db_3.4.0
+org.Dm.eg.db_3.4.2 and GO.db_3.4.2
 }
 \usage{
 geneset.GOBP.dme
 }
 \description{
 Gene Ontology Biological Process (GOBP) genesets for Drosophila melanogaster. All genesets are required to have >= 10 Entrez IDs.
-Built on Mon Mar 20 13:46:51 2017.
+Built on Mon Oct 16 16:24:38 2017.
 }
 \keyword{datasets}

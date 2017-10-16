@@ -14,13 +14,13 @@
     \item{set.name}{An \code{environment} containing a \code{list} whose keys are database specific accessions, and whose elements are human readable geneset names.}
 }}
 \source{
-org.Dr.eg.db_3.4.0 and GO.db_3.4.0
+org.Dr.eg.db_3.4.2 and GO.db_3.4.2
 }
 \usage{
 geneset.GOMF.dre
 }
 \description{
 Gene Ontology Molecular Function (GOMF) genesets for Danio rerio. All genesets are required to have >= 10 Entrez IDs.
-Built on Tue Mar 28 12:58:30 2017.
+Built on Mon Oct 16 16:25:08 2017.
 }
 \keyword{datasets}

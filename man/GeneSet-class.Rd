@@ -5,13 +5,13 @@
 
 \title{Class \code{"GeneSet"}}
 \description{
-Class for storing sets of genes and their corresponding metadata. 
+Class for storing sets of genes and their corresponding metadata.
 }
 
 \section{Objects from the Class}{
 Objects can be created by calls of the form \code{new("GeneSet")}.
 
-These objects are used internally by the \code{chipenrich} package and users will not likely need to create these. 
+These objects are used internally by the \code{chipenrich} package and users will not likely need to create these.
 }
 
 \section{Slots}{
@@ -30,20 +30,18 @@ Ryan Welch \email{welchr@umich.edu}
 }
 
 \note{
-Not typically accessed by the user - this is used internally by the \code{chipenrich} package. 
+Not typically accessed by the user - this is used internally by the \code{chipenrich} package.
 }
 
 \examples{
-library(chipenrich.data)
-
-# Show information about class. 
+# Show information about class.
 showClass("GeneSet")
 
-# What is stored inside a geneset object? 
+# What is stored inside a geneset object?
 data("geneset.metabolite.hsa");
 str(geneset.metabolite.hsa);
 
-# How are the mappings from geneset IDs to gene IDs stored? 
+# How are the mappings from geneset IDs to gene IDs stored?
 ls.str(geneset.metabolite.hsa@set.gene);
 }
 

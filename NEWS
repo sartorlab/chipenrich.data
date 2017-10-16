@@ -1,6 +1,19 @@
 CHANGES IN VERSION 2.0.0
 ------------------------
 
+    o Updated GO gene sets based on org.Db and GO.db 3.4.2 packages.
+
+    o Added gene sets from MSigDB. Specifically Hallmark, Immunologic Signatures,
+      MicroRNA targets, Oncogenic Signatures, and Transcription Factor targets
+      for human.
+
+    o Added Comparative Toxicogenomics Database gene sets for human.
+
+    o Updated BioCarta, DrugBank, KEGG, and pfam gene sets for human.
+
+CHANGES IN VERSION 2.0.0
+------------------------
+
 NEW FEATURES
 
     o Added locus definitions for danRer10 (zebrafish), dm6, hg38, rn5, and rn6.
