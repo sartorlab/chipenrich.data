@@ -1,4 +1,4 @@
-CHANGES IN VERSION 2.0.0
+CHANGES IN VERSION 2.2.0
 ------------------------
 
     o Updated GO gene sets based on org.Db and GO.db 3.4.2 packages.
