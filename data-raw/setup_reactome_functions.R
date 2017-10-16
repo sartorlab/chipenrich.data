@@ -104,6 +104,6 @@ build_reactome_genesets = function(org_code = c('Dm','Dr','Hs','Mm','Rn'), min_g
         ''
     )
 
-    write(doc, file = 'R/data.R', append = TRUE)
+    write(doc, file = 'R/genesets_reactome_doc.R', append = TRUE)
     return(NULL)
 }

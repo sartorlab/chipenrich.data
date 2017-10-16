@@ -129,6 +129,6 @@ build_GO_genesets = function(org_code = c('Dm','Dr','Hs','Mm','Rn'), min_geneset
 			''
 		)
 
-		write(doc, file = 'R/data.R', append = TRUE)
+		write(doc, file = 'R/genesets_GO_doc.R', append = TRUE)
 	}
 }

@@ -1046,7 +1046,7 @@ ldef_gr_to_LocusDefinition = function(ldef_gr, genome, organism, ldef_name, txdb
         ''
     )
 
-    write(doc, file = 'R/data.R', append = TRUE)
+    write(doc, file = 'R/ldefs_doc.R', append = TRUE)
 
 	return(NULL)
 }
