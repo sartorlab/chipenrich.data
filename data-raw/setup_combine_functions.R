@@ -1,4 +1,4 @@
-build_combine = function(type = c('BioCarta', 'CTD', 'DrugBank', 'Hallmark', 'Immunologic', 'KEGG', 'MicroRNA', 'Oncogenic', 'pfam', 'TF'), org_code = c('Hs'), min_geneset_size = 10) {
+build_combine = function(type = c('BioCarta', 'BioGrid', 'CTD', 'DrugBank', 'Hallmark', 'Immunologic', 'KEGG', 'MicroRNA', 'Oncogenic', 'pfam', 'TF'), org_code = c('Hs'), min_geneset_size = 10) {
     org_code = match.arg(org_code)
 
     if(org_code == 'Dm') {
@@ -70,6 +70,11 @@ build_combine = function(type = c('BioCarta', 'CTD', 'DrugBank', 'Hallmark', 'Im
         geneset_name = 'Transcription Factor Targets (MSigDB)'
         geneset_code = 'transcription_factors'
         db_url = 'http://software.broadinstitute.org/gsea/msigdb/collections.jsp#C3'
+    } else if (type == 'BioGrid') {
+        file = 'data-raw/BIOgrid_combine_file_hsa.txt'
+        geneset_name = 'BioGRID Protein Interactions'
+        geneset_code = 'protein_interaction_biogrid'
+        db_url = 'https://thebiogrid.org'
     }
 
     message(sprintf('On %s...', org_code))

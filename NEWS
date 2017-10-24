@@ -11,6 +11,10 @@ CHANGES IN VERSION 2.2.0
 
     o Updated BioCarta, DrugBank, KEGG, and pfam gene sets for human.
 
+    o Use BioGrid for human protein interactions instead of MiMi.
+
+    o Remove mirBase and MiMi based gene sets.
+
 CHANGES IN VERSION 2.0.0
 ------------------------
 

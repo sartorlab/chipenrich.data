@@ -38,9 +38,6 @@ geneset.metabolite.hsa
 geneset.metabolite.mmu
 geneset.metabolite.rno
 geneset.microrna.hsa
-geneset.mirbase.hsa
-geneset.mirbase.mmu
-geneset.mirbase.rno
 geneset.oncogenic.hsa
 geneset.panther_pathway.hsa
 geneset.panther_pathway.mmu
@@ -48,9 +45,7 @@ geneset.panther_pathway.rno
 geneset.pfam.hsa
 geneset.pfam.mmu
 geneset.pfam.rno
-geneset.protein_interaction_mimi.hsa
-geneset.protein_interaction_mimi.mmu
-geneset.protein_interaction_mimi.rno
+geneset.protein_interaction_biogrid.hsa
 geneset.reactome.dme
 geneset.reactome.dre
 geneset.reactome.hsa
