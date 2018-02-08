@@ -1,7 +1,9 @@
 source('data-raw/setup_ldefs_functions.R')
+library(GenomicRanges)
 devtools::load_all()
 
 build_locus_definitions('hg19')
+build_locus_definitions('hg19_refseq')
 build_locus_definitions('hg38')
 build_locus_definitions('mm9')
 build_locus_definitions('mm10')

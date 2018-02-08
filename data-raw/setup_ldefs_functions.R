@@ -105,13 +105,8 @@ get_package_version = function(package_name) {
 #' @return A sorted \code{GRanges} with Entrez ID and symbol metadata that is unique up to location and Entrez ID.
 #'
 
-build_transcript_gr = function(txdb, eg2symbol, ensembl2eg) {
-    if(is.null(ensembl2eg)) {
-        # Get transcripts with Entrez IDs and add gene symbols
-        gr = GenomicFeatures::transcripts(txdb, columns=c('gene_id'))
-        gr$gene_id = as.integer(gr$gene_id)
-        gr$symbol = eg2symbol[match(gr$gene_id, eg2symbol$gene_id), 'symbol']
-    } else {
+build_transcript_gr = function(txdb, eg2symbol, ensembl2eg, refseq2eg) {
+    if(!is.null(ensembl2eg)) {
         # Get transcripts with ENSEMBL IDs
         gr = GenomicFeatures::transcripts(txdb, columns=c('gene_id'))
         gr$gene_id = as.character(gr$gene_id)
@@ -128,6 +123,21 @@ build_transcript_gr = function(txdb, eg2symbol, ensembl2eg) {
         # Get Entrez IDs from ENSEMBL IDs
         gr$gene_id = ensembl2eg[match(gr$ensembl_id, ensembl2eg$ensembl_id), 'gene_id']
         # Get symbols from Entrez IDs
+        gr$symbol = eg2symbol[match(gr$gene_id, eg2symbol$gene_id), 'symbol']
+    } else if (!is.null(refseq2eg)) {
+        # Get transcripts with ENSEMBL IDs
+        gr = GenomicFeatures::transcripts(txdb, columns=c('gene_id'))
+        gr$gene_id = as.character(gr$gene_id)
+
+        colnames(mcols(gr)) = 'refseq_id'
+        # Get Entrez IDs from ENSEMBL IDs
+        gr$gene_id = refseq2eg[match(gr$refseq_id, refseq2eg$accession), 'gene_id']
+        # Get symbols from Entrez IDs
+        gr$symbol = eg2symbol[match(gr$gene_id, eg2symbol$gene_id), 'symbol']
+    } else {
+        # Get transcripts with Entrez IDs and add gene symbols
+        gr = GenomicFeatures::transcripts(txdb, columns=c('gene_id'))
+        gr$gene_id = as.integer(gr$gene_id)
         gr$symbol = eg2symbol[match(gr$gene_id, eg2symbol$gene_id), 'symbol']
     }
 
@@ -165,7 +175,7 @@ build_transcript_gr = function(txdb, eg2symbol, ensembl2eg) {
 #' @return A sorted \code{GRanges} with Entrez ID and symbol metadata that is unique up to location and Entrez ID.
 #'
 
-build_exons_introns_gr = function(txdb, eg2symbol, ensembl2eg, type = c('exons','introns')) {
+build_exons_introns_gr = function(txdb, eg2symbol, ensembl2eg, refseq2eg, type = c('exons','introns')) {
 
     # NOTE: For rn5, rn6 there is a warning:
     # Warning message:
@@ -187,15 +197,7 @@ build_exons_introns_gr = function(txdb, eg2symbol, ensembl2eg, type = c('exons',
     gr = unlist(grl, use.names = FALSE)
     mcols(gr)$tx_name = txname_vec
 
-    if(is.null(ensembl2eg)) {
-        # Get mapping from UCSC tx_name to Entrez Gene ID
-        # UCSC TXID and TXNAME to GENEID mapping (for introns and exons)
-        id_maps = AnnotationDbi::select(txdb, keys = names(grl), columns = c('TXID','GENEID'), keytype = 'TXNAME')
-        # Add Entrez Gene ID from UCSC tx_name
-        mcols(gr)$gene_id = id_maps[match(mcols(gr)$tx_name, id_maps$TXNAME), 'GENEID']
-        # Add symbol from Entrez Gene ID
-        mcols(gr)$symbol = eg2symbol[match(mcols(gr)$gene_id, eg2symbol$gene_id), 'symbol']
-    } else {
+    if(!is.null(ensembl2eg)) {
         # Get the ENSEMBL Transcript ID to ENSEMBL Gene ID mapping
         # When TxDb uses ENSEMBL, the result of exonsBy() or intronsByTranscript()
         # gives ENSEMBL Transcript IDs in the tx_name column of the GRanges
@@ -211,6 +213,21 @@ build_exons_introns_gr = function(txdb, eg2symbol, ensembl2eg, type = c('exons',
 
         # Add Entrez Gene ID from ENSEMBL Gene ID
         mcols(gr)$gene_id = ensembl2eg[match(gr$ensembl_id, ensembl2eg$ensembl_id), 'gene_id']
+        # Add symbol from Entrez Gene ID
+        mcols(gr)$symbol = eg2symbol[match(mcols(gr)$gene_id, eg2symbol$gene_id), 'symbol']
+    } else if (!is.null(refseq2eg)) {
+        # We already have the RefSeq IDs so we don't have to do the id_maps
+
+        # Get Entrez IDs from ENSEMBL IDs
+        gr$gene_id = refseq2eg[match(gr$tx_name, refseq2eg$accession), 'gene_id']
+        # Get symbols from Entrez IDs
+        gr$symbol = eg2symbol[match(gr$gene_id, eg2symbol$gene_id), 'symbol']
+    } else {
+        # Get mapping from UCSC tx_name to Entrez Gene ID
+        # UCSC TXID and TXNAME to GENEID mapping (for introns and exons)
+        id_maps = AnnotationDbi::select(txdb, keys = names(grl), columns = c('TXID','GENEID'), keytype = 'TXNAME')
+        # Add Entrez Gene ID from UCSC tx_name
+        mcols(gr)$gene_id = id_maps[match(mcols(gr)$tx_name, id_maps$TXNAME), 'GENEID']
         # Add symbol from Entrez Gene ID
         mcols(gr)$symbol = eg2symbol[match(mcols(gr)$gene_id, eg2symbol$gene_id), 'symbol']
     }
@@ -927,7 +944,7 @@ to_tss_rdata = function(gr, genome, txdb_version, orgdb_version, gencode_version
     # See: http://r-pkgs.had.co.nz/data.html section on Documenting datasets
 
     # Additional information about GENCODE
-    if(genome %in% c('hg19', 'hg38', 'mm9', 'mm10')) {
+    if(genome %in% c('hg19', 'hg19_refseq', 'hg38', 'mm9', 'mm10')) {
         source_desc = sprintf("#' @source R packages: %s and %s. GENCODE resources: %s and %s", txdb_version, orgdb_version, gencode_version, mapping_version)
     } else {
         source_desc = sprintf("#' @source R packages: %s and %s.", txdb_version, orgdb_version)
@@ -1019,7 +1036,7 @@ ldef_gr_to_LocusDefinition = function(ldef_gr, genome, organism, ldef_name, txdb
     }
 
     # Additional information about GENCODE
-    if(genome %in% c('hg19', 'hg38', 'mm9', 'mm10')) {
+    if(genome %in% c('hg19', 'hg19_refseq', 'hg38', 'mm9', 'mm10')) {
         source_desc = sprintf("#' @source R packages: %s and %s. GENCODE resources: %s and %s", txdb_version, orgdb_version, gencode_version, mapping_version)
     } else {
         source_desc = sprintf("#' @source R packages: %s and %s.", txdb_version, orgdb_version)
@@ -1076,6 +1093,7 @@ build_locus_definitions = function(genome) {
         require(org.Hs.eg.db)
         txdb = TxDb.Hsapiens.UCSC.hg19.knownGene
         egSYMBOL = org.Hs.egSYMBOL
+        egREFSEQ2EG = NULL
         egENSEMBL2EG = NULL
         egGENENAME = org.Hs.egGENENAME
         gencode_url = 'data-raw/gencode.v25lift37.annotation.gff3.gz'
@@ -1085,12 +1103,33 @@ build_locus_definitions = function(genome) {
         orgdb_version = get_package_version('org.Hs.eg.db')
         gencode_version = 'ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz'
         mapping_version = 'ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz'
+    } else if (genome == 'hg19_refseq') {
+        # Gives Entrez IDs
+        require(org.Hs.eg.db)
+        txdb = GenomicFeatures::makeTxDbFromGFF(
+            file = 'data-raw/hg19_refGene.gtf.gz',
+            format = 'gtf',
+            dataSource = 'RefSeq_Genes_refGene_table',
+            organism = 'Homo sapiens',
+            chrominfo = GenomeInfoDb::Seqinfo(genome = 'hg19'))
+        egSYMBOL = org.Hs.egSYMBOL
+        egREFSEQ2EG = org.Hs.egREFSEQ
+        egENSEMBL2EG = NULL
+        egGENENAME = org.Hs.egGENENAME
+        gencode_url = 'data-raw/gencode.v25lift37.annotation.gff3.gz'
+        mapping_url = 'data-raw/gencode.v25lift37.metadata.EntrezGene.gz'
+        organism = 'Homo sapiens'
+        txdb_version = 'UCSC_refGene_table_02072018'
+        orgdb_version = get_package_version('org.Hs.eg.db')
+        gencode_version = 'ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz'
+        mapping_version = 'ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz'
     } else if (genome == 'hg38') {
         # Gives Entrez IDs
         require(TxDb.Hsapiens.UCSC.hg38.knownGene)
         require(org.Hs.eg.db)
         txdb = TxDb.Hsapiens.UCSC.hg38.knownGene
         egSYMBOL = org.Hs.egSYMBOL
+        egREFSEQ2EG = NULL
         egENSEMBL2EG = NULL
         egGENENAME = org.Hs.egGENENAME
         gencode_url = 'data-raw/gencode.v25.annotation.gff3.gz'
@@ -1106,6 +1145,7 @@ build_locus_definitions = function(genome) {
         require(org.Mm.eg.db)
         txdb = TxDb.Mmusculus.UCSC.mm9.knownGene
         egSYMBOL = org.Mm.egSYMBOL
+        egREFSEQ2EG = NULL
         egENSEMBL2EG = NULL
         egGENENAME = org.Mm.egGENENAME
         gencode_url = 'data-raw/gencode.vM9.annotation.gff3.gz'
@@ -1121,6 +1161,7 @@ build_locus_definitions = function(genome) {
         require(org.Mm.eg.db)
         txdb = TxDb.Mmusculus.UCSC.mm10.knownGene
         egSYMBOL = org.Mm.egSYMBOL
+        egREFSEQ2EG = NULL
         egENSEMBL2EG = NULL
         egGENENAME = org.Mm.egGENENAME
         gencode_url = 'data-raw/gencode.vM12.annotation.gff3.gz'
@@ -1136,6 +1177,7 @@ build_locus_definitions = function(genome) {
         require(org.Rn.eg.db)
         txdb = TxDb.Rnorvegicus.UCSC.rn4.ensGene
         egSYMBOL = org.Rn.egSYMBOL
+        egREFSEQ2EG = NULL
         egENSEMBL2EG = org.Rn.egENSEMBL2EG
         egGENENAME = org.Rn.egGENENAME
         gencode_url = NULL
@@ -1151,6 +1193,7 @@ build_locus_definitions = function(genome) {
         require(org.Rn.eg.db)
         txdb = TxDb.Rnorvegicus.UCSC.rn5.refGene
         egSYMBOL = org.Rn.egSYMBOL
+        egREFSEQ2EG = NULL
         egENSEMBL2EG = NULL
         egGENENAME = org.Rn.egGENENAME
         gencode_url = NULL
@@ -1166,6 +1209,7 @@ build_locus_definitions = function(genome) {
         require(org.Rn.eg.db)
         txdb = TxDb.Rnorvegicus.UCSC.rn6.refGene
         egSYMBOL = org.Rn.egSYMBOL
+        egREFSEQ2EG = NULL
         egENSEMBL2EG = NULL
         egGENENAME = org.Rn.egGENENAME
         gencode_url = NULL
@@ -1181,6 +1225,7 @@ build_locus_definitions = function(genome) {
         require(org.Dm.eg.db)
         txdb = TxDb.Dmelanogaster.UCSC.dm3.ensGene
         egSYMBOL = org.Dm.egSYMBOL
+        egREFSEQ2EG = NULL
         egENSEMBL2EG = org.Dm.egENSEMBL2EG
         egGENENAME = org.Dm.egGENENAME
         gencode_url = NULL
@@ -1196,6 +1241,7 @@ build_locus_definitions = function(genome) {
         require(org.Dm.eg.db)
         txdb = TxDb.Dmelanogaster.UCSC.dm6.ensGene
         egSYMBOL = org.Dm.egSYMBOL
+        egREFSEQ2EG = NULL
         egENSEMBL2EG = org.Dm.egENSEMBL2EG
         egGENENAME = org.Dm.egGENENAME
         gencode_url = NULL
@@ -1210,6 +1256,7 @@ build_locus_definitions = function(genome) {
         require(org.Dr.eg.db)
         txdb = TxDb.Drerio.UCSC.danRer10.refGene
         egSYMBOL = org.Dr.egSYMBOL
+        egREFSEQ2EG = NULL
         egENSEMBL2EG = NULL
         egGENENAME = org.Dr.egGENENAME
         gencode_url = NULL
@@ -1236,35 +1283,41 @@ build_locus_definitions = function(genome) {
         ens2eg = NULL
     }
 
-    if(is.null(egENSEMBL2EG)) {
-        ### Build Entrez ID to gene symbol mapping
-            mapped_genes = AnnotationDbi::mappedkeys(egSYMBOL)
-            eg2symbol = as.data.frame(egSYMBOL[mapped_genes])
-            eg2symbol$gene_id = as.integer(eg2symbol$gene_id)
-
-        ### Make a null ensembl2eg
-            ensembl2eg = NULL
-    } else {
-        ### Build ENSEMBL ID to Entrez ID mapping
-            mapped_genes = AnnotationDbi::mappedkeys(egENSEMBL2EG)
-            ensembl2eg = as.data.frame(egENSEMBL2EG[mapped_genes])
-            ensembl2eg$gene_id = as.integer(ensembl2eg$gene_id)
+    if(!is.null(egSYMBOL)) {
         ### Build Entrez ID table to gene symbol mapping
             mapped_genes = AnnotationDbi::mappedkeys(egSYMBOL)
             eg2symbol = as.data.frame(egSYMBOL[mapped_genes])
             eg2symbol$gene_id = as.integer(eg2symbol$gene_id)
+    } else {
+        eg2symbol = NULL
+    }
+
+    if(!is.null(egENSEMBL2EG)) {
+        ### Build ENSEMBL ID to Entrez ID mapping
+            mapped_genes = AnnotationDbi::mappedkeys(egENSEMBL2EG)
+            ensembl2eg = as.data.frame(egENSEMBL2EG[mapped_genes])
+            ensembl2eg$gene_id = as.integer(ensembl2eg$gene_id)
+    } else {
+        ensembl2eg = NULL
+    }
+
+    if(!is.null(egREFSEQ2EG)) {
+        ### Build RefGene ID to Entrez ID mapping
+            mapped_genes = AnnotationDbi::mappedkeys(egREFSEQ2EG)
+            refseq2eg = as.data.frame(egREFSEQ2EG[mapped_genes])
+            refseq2eg$gene_id = as.integer(refseq2eg$gene_id)
+    } else {
+        refseq2eg = NULL
     }
 
     ### Filter txdb for canonical chromosomes
-        seqs = seqlevels(txdb)
-        seqs = seqs[!(grepl('gl',seqs) | grepl('hap',seqs) | grepl('alt',seqs) | grepl('random',seqs) | grepl('chrUn',seqs))]
-        seqlevels(txdb) = seqs
+        txdb = GenomeInfoDb::keepStandardChromosomes(txdb, pruning.mode = 'coarse')
 
     ################################################################################
     ### Build up gr_transcripts for nearest_tss, nearest_gene, and all nkb definitions
     ################################################################################
 
-        gr_transcripts = build_transcript_gr(txdb, eg2symbol, ensembl2eg)
+        gr_transcripts = build_transcript_gr(txdb, eg2symbol, ensembl2eg, refseq2eg)
         gr_transcripts = filter_gencode_types(gr = gr_transcripts, gencode = gencode, ens2eg = ens2eg)
         gr_transcripts = filter_readthrough_transcripts(gr = gr_transcripts, egGENENAME = egGENENAME)
 
@@ -1279,14 +1332,14 @@ build_locus_definitions = function(genome) {
     ### Build up gr_exons and gr_introns for exon and intron definitions
     ################################################################################
 
-        gr_exons = build_exons_introns_gr(txdb, eg2symbol, ensembl2eg, type='exons')
+        gr_exons = build_exons_introns_gr(txdb, eg2symbol, ensembl2eg, refseq2eg, type='exons')
         gr_exons = filter_gencode_types(gr = gr_exons, gencode = gencode, ens2eg = ens2eg)
         gr_exons = filter_readthrough_transcripts(gr = gr_exons, egGENENAME = egGENENAME)
 
         gr_exons = reduce_gr(gr_exons, eg2symbol)
 
 
-        gr_introns = build_exons_introns_gr(txdb, eg2symbol, ensembl2eg, type='introns')
+        gr_introns = build_exons_introns_gr(txdb, eg2symbol, ensembl2eg, refseq2eg, type='introns')
         gr_introns = filter_gencode_types(gr = gr_introns, gencode = gencode, ens2eg = ens2eg)
         gr_introns = filter_readthrough_transcripts(gr = gr_introns, egGENENAME = egGENENAME)
 
