@@ -35,8 +35,8 @@ Not typically accessed by the user - this is used internally by the \code{chipen
 showClass("LocusDefinition");
 
 # Example of what a locus definition object looks like.
-data(locusdef.mm9.nearest_tss);
-str(locusdef.mm9.nearest_tss);
+data(locusdef.mm9.nearest_tss)
+lapply(attributes(locusdef.mm9.nearest_tss), head)
 }
 
 \keyword{classes}
