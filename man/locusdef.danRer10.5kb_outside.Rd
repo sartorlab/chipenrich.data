@@ -12,7 +12,7 @@
     \item{organism}{A \code{character} indicating the organism name. In this case, Danio rerio.}
 }}
 \source{
-R packages: TxDb.Drerio.UCSC.danRer10.refGene_3.4.0 and org.Dr.eg.db_3.4.0.
+R packages: TxDb.Drerio.UCSC.danRer10.refGene_3.4.2 and org.Dr.eg.db_3.5.0.
 }
 \usage{
 locusdef.danRer10.5kb_outside
@@ -21,6 +21,6 @@ locusdef.danRer10.5kb_outside
 A \code{LocusDefinition} where a gene locus is defined as the region beyond 5kb upstream and downstream of the TSS and bounded by the midpoints between the TSS and the next upstream and downstream TSSs.
 }
 \details{
-Built on Tue Mar 28 12:56:08 2017.
+Built on Fri Apr 13 09:54:27 2018.
 }
 \keyword{datasets}

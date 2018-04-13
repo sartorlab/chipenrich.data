@@ -12,7 +12,7 @@
     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
 }}
 \source{
-R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.4.0. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
+R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.5.0. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
 }
 \usage{
 locusdef.hg19.nearest_gene
@@ -21,6 +21,6 @@ locusdef.hg19.nearest_gene
 A \code{LocusDefinition} where a gene locus is defined as the region spanning the midpoints between adjacent TSSs and TESs.
 }
 \details{
-Built on Sat Mar 18 12:52:10 2017.
+Built on Fri Apr 13 09:45:51 2018.
 }
 \keyword{datasets}

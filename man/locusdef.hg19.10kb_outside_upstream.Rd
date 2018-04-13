@@ -12,7 +12,7 @@
     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
 }}
 \source{
-R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.4.0. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
+R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.5.0. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
 }
 \usage{
 locusdef.hg19.10kb_outside_upstream
@@ -21,6 +21,6 @@ locusdef.hg19.10kb_outside_upstream
 A \code{LocusDefinition} where a gene locus is defined as the region beyond 10kb upstream of the TSS and bounded by the midpoint between the TSS and the next upstream TSS.
 }
 \details{
-Built on Sat Mar 18 12:52:19 2017.
+Built on Fri Apr 13 09:45:58 2018.
 }
 \keyword{datasets}

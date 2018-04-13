@@ -12,7 +12,7 @@
     \item{organism}{A \code{character} indicating the organism name. In this case, Drosophila melanogaster.}
 }}
 \source{
-R packages: TxDb.Dmelanogaster.UCSC.dm3.ensGene_3.2.2 and org.Dm.eg.db_3.4.0.
+R packages: TxDb.Dmelanogaster.UCSC.dm3.ensGene_3.2.2 and org.Dm.eg.db_3.5.0.
 }
 \usage{
 locusdef.dm3.nearest_gene
@@ -23,6 +23,6 @@ A \code{LocusDefinition} where a gene locus is defined as the region spanning th
 \details{
 For the dm3 genome, original gene IDs are from ENSEMBL and so an additional step of converting to Entrez IDs is done.
 
-Built on Sat Mar 18 13:07:59 2017.
+Built on Fri Apr 13 09:53:03 2018.
 }
 \keyword{datasets}

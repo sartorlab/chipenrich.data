@@ -12,7 +12,7 @@
     \item{organism}{A \code{character} indicating the organism name. In this case, Mus musculus.}
 }}
 \source{
-R packages: TxDb.Mmusculus.UCSC.mm9.knownGene_3.2.2 and org.Mm.eg.db_3.4.0. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_mouse/release_M9/gencode.vM9.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_mouse/release_M9/gencode.vM9.metadata.EntrezGene.gz
+R packages: TxDb.Mmusculus.UCSC.mm9.knownGene_3.2.2 and org.Mm.eg.db_3.5.0. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_mouse/release_M9/gencode.vM9.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_mouse/release_M9/gencode.vM9.metadata.EntrezGene.gz
 }
 \usage{
 locusdef.mm9.1kb
@@ -21,6 +21,6 @@ locusdef.mm9.1kb
 A \code{LocusDefinition} where a gene locus is defined within 1kb upstream and downstream of the TSS.
 }
 \details{
-Built on Sat Mar 18 12:57:35 2017.
+Built on Fri Apr 13 09:50:41 2018.
 }
 \keyword{datasets}

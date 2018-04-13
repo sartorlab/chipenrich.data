@@ -12,7 +12,7 @@
     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
 }}
 \source{
-R packages: TxDb.Hsapiens.UCSC.hg38.knownGene_3.4.0 and org.Hs.eg.db_3.4.0. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/gencode.v25.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/gencode.v25.metadata.EntrezGene.gz
+R packages: TxDb.Hsapiens.UCSC.hg38.knownGene_3.4.0 and org.Hs.eg.db_3.5.0. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/gencode.v25.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/gencode.v25.metadata.EntrezGene.gz
 }
 \usage{
 locusdef.hg38.10kb
@@ -21,6 +21,6 @@ locusdef.hg38.10kb
 A \code{LocusDefinition} where a gene locus is defined within 10kb upstream and downstream of the TSS.
 }
 \details{
-Built on Sat Mar 18 12:56:36 2017.
+Built on Fri Apr 13 09:49:42 2018.
 }
 \keyword{datasets}

@@ -12,7 +12,7 @@
     \item{organism}{A \code{character} indicating the organism name. In this case, Rattus norvegicus.}
 }}
 \source{
-R packages: TxDb.Rnorvegicus.UCSC.rn6.refGene_3.4.0 and org.Rn.eg.db_3.4.0.
+R packages: TxDb.Rnorvegicus.UCSC.rn6.refGene_3.4.1 and org.Rn.eg.db_3.5.0.
 }
 \usage{
 locusdef.rn6.1kb_outside
@@ -21,6 +21,6 @@ locusdef.rn6.1kb_outside
 A \code{LocusDefinition} where a gene locus is defined as the region beyond 1kb upstream and downstream of the TSS and bounded by the midpoints between the TSS and the next upstream and downstream TSSs.
 }
 \details{
-Built on Sat Mar 18 13:07:31 2017.
+Built on Fri Apr 13 09:52:38 2018.
 }
 \keyword{datasets}

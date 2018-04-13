@@ -12,7 +12,7 @@
     \item{organism}{A \code{character} indicating the organism name. In this case, Danio rerio.}
 }}
 \source{
-R packages: TxDb.Drerio.UCSC.danRer10.refGene_3.4.0 and org.Dr.eg.db_3.4.0.
+R packages: TxDb.Drerio.UCSC.danRer10.refGene_3.4.2 and org.Dr.eg.db_3.5.0.
 }
 \usage{
 locusdef.danRer10.nearest_gene
@@ -21,6 +21,6 @@ locusdef.danRer10.nearest_gene
 A \code{LocusDefinition} where a gene locus is defined as the region spanning the midpoints between adjacent TSSs and TESs.
 }
 \details{
-Built on Tue Mar 28 12:56:02 2017.
+Built on Fri Apr 13 09:54:23 2018.
 }
 \keyword{datasets}

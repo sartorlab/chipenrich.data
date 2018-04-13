@@ -12,7 +12,7 @@
     \item{organism}{A \code{character} indicating the organism name. In this case, Rattus norvegicus.}
 }}
 \source{
-R packages: TxDb.Rnorvegicus.UCSC.rn5.refGene_3.4.0 and org.Rn.eg.db_3.4.0.
+R packages: TxDb.Rnorvegicus.UCSC.rn5.refGene_3.4.2 and org.Rn.eg.db_3.5.0.
 }
 \usage{
 locusdef.rn5.intron
@@ -21,6 +21,6 @@ locusdef.rn5.intron
 A \code{LocusDefinition} where a gene locus is defined as the introns belonging to genes.
 }
 \details{
-Built on Sat Mar 18 13:07:09 2017.
+Built on Fri Apr 13 09:52:19 2018.
 }
 \keyword{datasets}

@@ -12,7 +12,7 @@
     \item{organism}{A \code{character} indicating the organism name. In this case, Rattus norvegicus.}
 }}
 \source{
-R packages: TxDb.Rnorvegicus.UCSC.rn4.ensGene_3.2.2 and org.Rn.eg.db_3.4.0.
+R packages: TxDb.Rnorvegicus.UCSC.rn4.ensGene_3.2.2 and org.Rn.eg.db_3.5.0.
 }
 \usage{
 locusdef.rn4.1kb_outside_upstream
@@ -23,6 +23,6 @@ A \code{LocusDefinition} where a gene locus is defined as the region beyond 1kb 
 \details{
 For the rn4 genome, original gene IDs are from ENSEMBL and so an additional step of converting to Entrez IDs is done.
 
-Built on Sat Mar 18 13:06:48 2017.
+Built on Fri Apr 13 09:52:01 2018.
 }
 \keyword{datasets}

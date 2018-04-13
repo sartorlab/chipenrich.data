@@ -12,7 +12,7 @@
     \item{organism}{A \code{character} indicating the organism name. In this case, Drosophila melanogaster.}
 }}
 \source{
-R packages: TxDb.Dmelanogaster.UCSC.dm6.ensGene_3.3.0 and org.Dm.eg.db_3.4.0.
+R packages: TxDb.Dmelanogaster.UCSC.dm6.ensGene_3.4.1 and org.Dm.eg.db_3.5.0.
 }
 \usage{
 locusdef.dm6.nearest_tss
@@ -23,6 +23,6 @@ A \code{LocusDefinition} where a gene locus is defined as the region spanning th
 \details{
 For the dm6 genome, original gene IDs are from FLYBASE and so an additional step of converting to Entrez IDs is done.
 
-Built on Sat Mar 18 13:08:37 2017.
+Built on Fri Apr 13 09:53:33 2018.
 }
 \keyword{datasets}

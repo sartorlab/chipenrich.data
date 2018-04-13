@@ -227,6 +227,9 @@ build_exons_introns_gr = function(txdb, eg2symbol, ensembl2eg, type = c('exons',
     # Can't do chipenrich without it
     gr = gr[!is.na(gr$gene_id)]
 
+    # Only take regions with width > 1
+    gr = gr[which(width(gr) > 1)]
+
     # Enforce uniqueness on location + gene_id
     gr = unique(gr)
     gr = sort(gr)
@@ -737,6 +740,9 @@ build_ldef_nearest_tss = function(gr, eg2symbol) {
     # Remove strand information
     strand(ldef) = '*'
 
+    # Only take regions with width > 1
+    ldef = ldef[which(width(ldef) > 1)]
+
     # Sort and unique
     ldef = sort(ldef)
     ldef = unique(ldef)
@@ -786,6 +792,9 @@ build_ldef_nearest_gene = function(gr, eg2symbol) {
             gene_id = gr$gene_id,
             symbol = gr$symbol)
     )
+
+    # Only take regions with width > 1
+    ldef = ldef[which(width(ldef) > 1)]
 
     # Enforce uniqueness of ranges/gene_id
     ldef = sort(ldef)
