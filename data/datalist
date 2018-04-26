@@ -21,9 +21,6 @@ geneset.ctd.hsa
 geneset.drug_bank.hsa
 geneset.drug_bank.mmu
 geneset.drug_bank.rno
-geneset.ehmn_pathway_gene.hsa
-geneset.ehmn_pathway_gene.mmu
-geneset.ehmn_pathway_gene.rno
 geneset.hallmark.hsa
 geneset.immunologic.hsa
 geneset.kegg_pathway.hsa
