@@ -1,4 +1,4 @@
-build_combine = function(type = c('BioCarta', 'BioGrid', 'CTD', 'DrugBank', 'Hallmark', 'Immunologic', 'KEGG', 'MicroRNA', 'Oncogenic', 'pfam', 'TF'), org_code = c('Hs'), min_geneset_size = 10) {
+build_combine = function(type = c('BioCarta', 'BioGrid', 'CTD', 'DrugBank', 'Hallmark', 'Immunologic', 'KEGG', 'MicroRNA', 'Oncogenic', 'pfam', 'TF'), org_code = c('Hs','Mm'), min_geneset_size = 10) {
     org_code = match.arg(org_code)
 
     if(org_code == 'Dm') {
@@ -26,7 +26,7 @@ build_combine = function(type = c('BioCarta', 'BioGrid', 'CTD', 'DrugBank', 'Hal
         geneset_code = 'biocarta_pathway'
         db_url = 'https://cgap.nci.nih.gov/Pathways/BioCarta_Pathways'
     } else if (type == 'CTD') {
-        file = 'data-raw/CTD_combine_file_hsa.txt'
+        file = sprintf('data-raw/CTD_combine_file_%s.txt', org)
         geneset_name = 'Comparative Toxicogenomics Database'
         geneset_code = 'ctd'
         db_url = 'http://ctdbase.org'
