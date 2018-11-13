@@ -3,6 +3,7 @@ devtools::load_all()
 
 build_combine(type = c('BioCarta'), org_code = c('Hs'), min_geneset_size = 10)
 build_combine(type = c('CTD'), org_code = c('Hs'), min_geneset_size = 10)
+build_combine(type = c('CTD'), org_code = c('Mm'), min_geneset_size = 10)
 build_combine(type = c('DrugBank'), org_code = c('Hs'), min_geneset_size = 10)
 build_combine(type = c('Hallmark'), org_code = c('Hs'), min_geneset_size = 10)
 build_combine(type = c('Immunologic'), org_code = c('Hs'), min_geneset_size = 10)
