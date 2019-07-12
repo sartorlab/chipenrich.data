@@ -1,3 +1,4 @@
+enhancers.dnase_thurman.0
 geneset.GOBP.dme
 geneset.GOBP.dre
 geneset.GOBP.hsa
@@ -258,6 +259,7 @@ mappa.mm9.nearest_tss.50mer
 mappa.mm9.nearest_tss.75mer
 peaks_E2F4
 peaks_H3K4me3_GM12878
+spline.90ENCODE
 tss.dm3
 tss.dm6
 tss.hg19
