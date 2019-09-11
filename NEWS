@@ -2,7 +2,11 @@ CHANGES IN VERSION 2.10.0
 ------------------------
    
     o Added data required for proxReg: enhancers.dnase_thurman.0, gene.enh.desc
+    
+CHANGES IN VERSION 2.8.0
+------------------------
 
+    o Added Comparative Toxicogenomics Database for mm9
 
 CHANGES IN VERSION 2.4.0
 ------------------------
