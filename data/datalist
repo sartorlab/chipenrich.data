@@ -1,4 +1,5 @@
-enhancer.dnase_thurman.0
+enhancer.hg19
+enhancer.hg38
 gene.enh.desc
 geneset.GOBP.dme
 geneset.GOBP.dre

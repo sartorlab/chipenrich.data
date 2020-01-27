@@ -1,7 +1,19 @@
+
+
+CHANGES IN VERSION 2.11.1
+------------------------
+
+    o Renamed enhancers.dnase_thurman.0 to enhancer.hg19 to prepare for more species
+    o Added enhancer.hg38
+    
+WARNING: If using proxReg(), both chipenrich.data and chipenrich must be updated to either both development versions or both current bioconductor versions!
+
+
+
 CHANGES IN VERSION 2.10.0
 ------------------------
    
-    o Added data required for proxReg: enhancers.dnase_thurman.0, gene.enh.desc,
+    o Added data required for proxReg: enhancer.dnase_thurman.0, gene.enh.desc,
       spline.log_dtss.90ENCODE
     
 CHANGES IN VERSION 2.8.0

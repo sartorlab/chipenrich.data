@@ -118,7 +118,7 @@
 #' @source R packages: TxDb.Drerio.UCSC.danRer10.refGene_3.4.2 and org.Dr.eg.db_3.5.0.
 "tss.danRer10"
 
-#' Enhancer locations
+#' Enhancer locations - hg19
 #'
 #' A \code{GRanges} with all the enhancer locations for hg19. The locations were found using a combination of DNAse data and from Thurman et al (PMID: 22955617)
 #'
@@ -127,18 +127,29 @@
 #'     \item{gene_id}{The Entrez ID for the TSS}
 #'     \item{symbol}{The gene symbol for the TSS}
 #' }
-"enhancer.dnase_thurman.0"
+"enhancer.hg19"
+
+#' Enhancer locations - hg38
+#'
+#' A \code{GRanges} with all the enhancer locations for hg38. The locations were found using a combination of DNAse data and from Thurman et al (PMID: 22955617) for hg19, then used LiftOver (PMID: 16381938) to convert to hg38.
+#'
+#' @format A \code{GRanges} object with the following \code{mcols}:
+#' \describe{
+#'     \item{gene_id}{The Entrez ID for the TSS}
+#'     \item{symbol}{The gene symbol for the TSS}
+#' }
+"enhancer.hg38"
 
 #' Gene-Enhancer descriptives
 #'
-#' A data frame with gene-level descriptions of enhancer properties using enhancers.dnase_thurman.0. Used in the adjustment of proximity test to enhancers.
+#' A data frame with gene-level descriptions of enhancer properties using enhancers.hg19. Used in the adjustment of proximity test to enhancers.
 #' \describe{
 #'     \item{gene_id}{The Entrez ID for the a gene}
 #'     \item{avg_denh_emp}{The empirical average distance to an enhancer from 90 ENCODE ChIP-seq datasets. This is used as the adjustment.}
 #'     \item{num_enh}{The number of enhancers assigned to the gene, defined by closest gene TSS}
 #'     \item{avgdenh}{The theoretical average distance to an enhancer assuming every base pair on the genome is equally likely to have a peak binding.}
 #' }
-#'
+
 "gene.enh.desc"
 
 #' DTSS Spline adjustment
