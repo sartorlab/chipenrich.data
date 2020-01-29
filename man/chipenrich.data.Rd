@@ -3,7 +3,6 @@
 \docType{package}
 \name{chipenrich.data}
 \alias{chipenrich.data}
-\alias{chipenrich.data-package}
 \title{chipenrich.data: Data for chipenrich: gene set enrichment analysis for ChIP-seq data}
 \description{
 Supporting data for the chipenrich package. Includes pre-defined gene sets, gene locus definitions, and mappability estimates.

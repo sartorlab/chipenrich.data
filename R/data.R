@@ -140,7 +140,7 @@
 #' }
 "enhancer.hg38"
 
-#' Gene-Enhancer descriptives
+#' Gene-Enhancer descriptives - hg19
 #'
 #' A data frame with gene-level descriptions of enhancer properties using enhancers.hg19. Used in the adjustment of proximity test to enhancers.
 #' \describe{
@@ -149,8 +149,7 @@
 #'     \item{num_enh}{The number of enhancers assigned to the gene, defined by closest gene TSS}
 #'     \item{avgdenh}{The theoretical average distance to an enhancer assuming every base pair on the genome is equally likely to have a peak binding.}
 #' }
-
-"gene.enh.desc"
+"gene.enh.desc.hg19"
 
 #' DTSS Spline adjustment
 #'
