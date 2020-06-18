@@ -1,6 +1,10 @@
 enhancer.hg19
 enhancer.hg38
+enhancer.mm9
+enhancer.mm10
 gene.enh.desc.hg19
+gene.enh.desc.mm9
+gene.enh.desc.mm10
 geneset.GOBP.dme
 geneset.GOBP.dre
 geneset.GOBP.hsa
