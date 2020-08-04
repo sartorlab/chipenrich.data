@@ -3,6 +3,9 @@ CHANGES IN VERSION 2.10.0
    
     o Added data required for proxReg: enhancers.dnase_thurman.0, gene.enh.desc,
       spline.log_dtss.90ENCODE
+
+    o Added mouse enhancer data for proxReg; added hg19 enhancer data to
+      chipenrich.data
     
 CHANGES IN VERSION 2.8.0
 ------------------------
