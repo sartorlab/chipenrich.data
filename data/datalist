@@ -99,6 +99,8 @@ locusdef.hg19.1kb_outside_upstream
 locusdef.hg19.5kb
 locusdef.hg19.5kb_outside
 locusdef.hg19.5kb_outside_upstream
+locusdef.hg19.enhancer
+locusdef.hg19.enhancer_plus5kb
 locusdef.hg19.exon
 locusdef.hg19.intron
 locusdef.hg19.nearest_gene
