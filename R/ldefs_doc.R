@@ -14,6 +14,8 @@
 #' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.5.0. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
 "locusdef.hg19.nearest_tss"
 
+"locusdef.hg19.enhancer_plus5kb"
+"locusdef.hg19.enhancer"
 #' locusdef.hg19.nearest_gene locus definition
 #'
 #' A \code{LocusDefinition} where a gene locus is defined as the region spanning the midpoints between adjacent TSSs and TESs.
