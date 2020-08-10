@@ -16,6 +16,8 @@
 
 "locusdef.hg19.enhancer_plus5kb"
 "locusdef.hg19.enhancer"
+"locusdef.hg38.enhancer_plus5kb"
+"locusdef.hg38.enhancer"
 #' locusdef.hg19.nearest_gene locus definition
 #'
 #' A \code{LocusDefinition} where a gene locus is defined as the region spanning the midpoints between adjacent TSSs and TESs.
