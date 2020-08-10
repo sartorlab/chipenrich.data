@@ -114,6 +114,8 @@ locusdef.hg38.1kb_outside_upstream
 locusdef.hg38.5kb
 locusdef.hg38.5kb_outside
 locusdef.hg38.5kb_outside_upstream
+locusdef.hg38.enhancer
+locusdef.hg38.enhancer_plus5kb
 locusdef.hg38.exon
 locusdef.hg38.intron
 locusdef.hg38.nearest_gene
