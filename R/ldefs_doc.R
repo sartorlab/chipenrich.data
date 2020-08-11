@@ -14,10 +14,38 @@
 #' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.5.0. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
 "locusdef.hg19.nearest_tss"
 
-"locusdef.hg19.enhancer_plus5kb"
+#' locusdef.hg19.enhancer locus definition
+#'
+#' A \code{LocusDefinition} where a enhancer locus is defined as the region of enhancers.
+#'
+#' Built on Tue Aug 11 09:45:51 2020.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, and \code{gene_id}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, hg19.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.5.0. 
 "locusdef.hg19.enhancer"
-"locusdef.hg38.enhancer_plus5kb"
-"locusdef.hg38.enhancer"
+
+#' locusdef.hg19.enhancer locus definition
+#'
+#' A \code{LocusDefinition} where a enhancer locus is defined as the region of enhancers plus 5kb.
+#'
+#' Built on Tue Aug 11 09:45:51 2020.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, and \code{gene_id}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, hg19.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.5.0. 
+"locusdef.hg19.enhancer_plus5kb"
+
 #' locusdef.hg19.nearest_gene locus definition
 #'
 #' A \code{LocusDefinition} where a gene locus is defined as the region spanning the midpoints between adjacent TSSs and TESs.
@@ -225,6 +253,38 @@
 #' }
 #' @source R packages: TxDb.Hsapiens.UCSC.hg38.knownGene_3.4.0 and org.Hs.eg.db_3.5.0. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/gencode.v25.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/gencode.v25.metadata.EntrezGene.gz
 "locusdef.hg38.nearest_tss"
+
+#' locusdef.hg38.enhancer locus definition
+#'
+#' A \code{LocusDefinition} where a enhancer locus is defined as the region of enhancers.
+#'
+#' Built on Tue Aug 11 09:45:51 2020.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, and \code{gene_id}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, hg38.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg38.knownGene_3.2.2 and org.Hs.eg.db_3.5.0. 
+"locusdef.hg38.enhancer"
+
+#' locusdef.hg38.enhancer locus definition
+#'
+#' A \code{LocusDefinition} where a enhancer locus is defined as the region of enhancers plus 5kb.
+#'
+#' Built on Tue Aug 11 09:45:51 2020.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, and \code{gene_id}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, hg38.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg38.knownGene_3.2.2 and org.Hs.eg.db_3.5.0. 
+"locusdef.hg38.enhancer_plus5kb"
 
 #' locusdef.hg38.nearest_gene locus definition
 #'
