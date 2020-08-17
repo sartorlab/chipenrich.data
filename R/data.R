@@ -146,3 +146,27 @@
 #' A mgcv::gam object on a combined data of 90 ENCODE ChIP-seq datasets that modeled the relationship between a gene's locus length the distance from a peak to the gene's transcription start site, using a cubic spline. This is used to adjust for the proximity to TSSes test.
 #'
 "spline.log_dtss.90ENCODE"
+#' tss.hg19 TSS locations
+#'
+#' A \code{GRanges} with all the TSSs for hg19. Primarily used in the \code{assign_peaks()} function to report distance of a peak to the nearest TSS. Also used to build the QC plot with distribution of peaks to TSSs.
+#'
+#' @format A \code{GRanges} object with the following \code{mcols}:
+#' \describe{
+#'     \item{gene_id}{The Entrez ID for the TSS}
+#'     \item{symbol}{The gene symbol for the TSS}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.8.2. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
+"tss.hg19"
+
+#' tss.hg19 TSS locations
+#'
+#' A \code{GRanges} with all the TSSs for hg19. Primarily used in the \code{assign_peaks()} function to report distance of a peak to the nearest TSS. Also used to build the QC plot with distribution of peaks to TSSs.
+#'
+#' @format A \code{GRanges} object with the following \code{mcols}:
+#' \describe{
+#'     \item{gene_id}{The Entrez ID for the TSS}
+#'     \item{symbol}{The gene symbol for the TSS}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.8.2. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
+"tss.hg19"
+

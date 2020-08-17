@@ -2220,3 +2220,419 @@
 #' @source R packages: TxDb.Drerio.UCSC.danRer10.refGene_3.4.2 and org.Dr.eg.db_3.5.0.
 "locusdef.danRer10.10kb_outside"
 
+#' locusdef.hg19.nearest_tss locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined as the region spanning the midpoints between adjacent TSSs.
+#'
+#' Built on Tue Aug 11 15:40:24 2020.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, hg19.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.8.2. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
+"locusdef.hg19.nearest_tss"
+
+#' locusdef.hg19.nearest_gene locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined as the region spanning the midpoints between adjacent TSSs and TESs.
+#'
+#' Built on Tue Aug 11 15:40:25 2020.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, hg19.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.8.2. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
+"locusdef.hg19.nearest_gene"
+
+#' locusdef.hg19.exon locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined as the exons belonging to genes.
+#'
+#' Built on Tue Aug 11 15:40:27 2020.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, hg19.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.8.2. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
+"locusdef.hg19.exon"
+
+#' locusdef.hg19.intron locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined as the introns belonging to genes.
+#'
+#' Built on Tue Aug 11 15:40:29 2020.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, hg19.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.8.2. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
+"locusdef.hg19.intron"
+
+#' locusdef.hg19.1kb locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined within 1kb upstream and downstream of the TSS.
+#'
+#' Built on Tue Aug 11 15:40:30 2020.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, hg19.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.8.2. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
+"locusdef.hg19.1kb"
+
+#' locusdef.hg19.1kb_outside_upstream locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined as the region beyond 1kb upstream of the TSS and bounded by the midpoint between the TSS and the next upstream TSS.
+#'
+#' Built on Tue Aug 11 15:40:31 2020.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, hg19.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.8.2. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
+"locusdef.hg19.1kb_outside_upstream"
+
+#' locusdef.hg19.1kb_outside locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined as the region beyond 1kb upstream and downstream of the TSS and bounded by the midpoints between the TSS and the next upstream and downstream TSSs.
+#'
+#' Built on Tue Aug 11 15:40:31 2020.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, hg19.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.8.2. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
+"locusdef.hg19.1kb_outside"
+
+#' locusdef.hg19.5kb locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined within 5kb upstream and downstream of the TSS.
+#'
+#' Built on Tue Aug 11 15:40:32 2020.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, hg19.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.8.2. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
+"locusdef.hg19.5kb"
+
+#' locusdef.hg19.5kb_outside_upstream locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined as the region beyond 5kb upstream of the TSS and bounded by the midpoint between the TSS and the next upstream TSS.
+#'
+#' Built on Tue Aug 11 15:40:32 2020.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, hg19.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.8.2. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
+"locusdef.hg19.5kb_outside_upstream"
+
+#' locusdef.hg19.5kb_outside locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined as the region beyond 5kb upstream and downstream of the TSS and bounded by the midpoints between the TSS and the next upstream and downstream TSSs.
+#'
+#' Built on Tue Aug 11 15:40:33 2020.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, hg19.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.8.2. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
+"locusdef.hg19.5kb_outside"
+
+#' locusdef.hg19.10kb locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined within 10kb upstream and downstream of the TSS.
+#'
+#' Built on Tue Aug 11 15:40:33 2020.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, hg19.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.8.2. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
+"locusdef.hg19.10kb"
+
+#' locusdef.hg19.10kb_outside_upstream locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined as the region beyond 10kb upstream of the TSS and bounded by the midpoint between the TSS and the next upstream TSS.
+#'
+#' Built on Tue Aug 11 15:40:34 2020.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, hg19.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.8.2. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
+"locusdef.hg19.10kb_outside_upstream"
+
+#' locusdef.hg19.10kb_outside locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined as the region beyond 10kb upstream and downstream of the TSS and bounded by the midpoints between the TSS and the next upstream and downstream TSSs.
+#'
+#' Built on Tue Aug 11 15:40:34 2020.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, hg19.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.8.2. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
+"locusdef.hg19.10kb_outside"
+
+#' locusdef.hg19.nearest_tss locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined as the region spanning the midpoints between adjacent TSSs.
+#'
+#' Built on Tue Aug 11 16:50:50 2020.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, hg19.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.8.2. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
+"locusdef.hg19.nearest_tss"
+
+#' locusdef.hg19.nearest_gene locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined as the region spanning the midpoints between adjacent TSSs and TESs.
+#'
+#' Built on Tue Aug 11 16:50:50 2020.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, hg19.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.8.2. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
+"locusdef.hg19.nearest_gene"
+
+#' locusdef.hg19.exon locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined as the exons belonging to genes.
+#'
+#' Built on Tue Aug 11 16:50:53 2020.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, hg19.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.8.2. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
+"locusdef.hg19.exon"
+
+#' locusdef.hg19.intron locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined as the introns belonging to genes.
+#'
+#' Built on Tue Aug 11 16:50:54 2020.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, hg19.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.8.2. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
+"locusdef.hg19.intron"
+
+#' locusdef.hg19.1kb locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined within 1kb upstream and downstream of the TSS.
+#'
+#' Built on Tue Aug 11 16:50:55 2020.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, hg19.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.8.2. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
+"locusdef.hg19.1kb"
+
+#' locusdef.hg19.1kb_outside_upstream locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined as the region beyond 1kb upstream of the TSS and bounded by the midpoint between the TSS and the next upstream TSS.
+#'
+#' Built on Tue Aug 11 16:50:55 2020.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, hg19.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.8.2. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
+"locusdef.hg19.1kb_outside_upstream"
+
+#' locusdef.hg19.1kb_outside locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined as the region beyond 1kb upstream and downstream of the TSS and bounded by the midpoints between the TSS and the next upstream and downstream TSSs.
+#'
+#' Built on Tue Aug 11 16:50:56 2020.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, hg19.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.8.2. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
+"locusdef.hg19.1kb_outside"
+
+#' locusdef.hg19.5kb locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined within 5kb upstream and downstream of the TSS.
+#'
+#' Built on Tue Aug 11 16:50:57 2020.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, hg19.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.8.2. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
+"locusdef.hg19.5kb"
+
+#' locusdef.hg19.5kb_outside_upstream locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined as the region beyond 5kb upstream of the TSS and bounded by the midpoint between the TSS and the next upstream TSS.
+#'
+#' Built on Tue Aug 11 16:50:57 2020.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, hg19.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.8.2. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
+"locusdef.hg19.5kb_outside_upstream"
+
+#' locusdef.hg19.5kb_outside locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined as the region beyond 5kb upstream and downstream of the TSS and bounded by the midpoints between the TSS and the next upstream and downstream TSSs.
+#'
+#' Built on Tue Aug 11 16:50:58 2020.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, hg19.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.8.2. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
+"locusdef.hg19.5kb_outside"
+
+#' locusdef.hg19.10kb locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined within 10kb upstream and downstream of the TSS.
+#'
+#' Built on Tue Aug 11 16:50:58 2020.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, hg19.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.8.2. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
+"locusdef.hg19.10kb"
+
+#' locusdef.hg19.10kb_outside_upstream locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined as the region beyond 10kb upstream of the TSS and bounded by the midpoint between the TSS and the next upstream TSS.
+#'
+#' Built on Tue Aug 11 16:50:59 2020.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, hg19.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.8.2. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
+"locusdef.hg19.10kb_outside_upstream"
+
+#' locusdef.hg19.10kb_outside locus definition
+#'
+#' A \code{LocusDefinition} where a gene locus is defined as the region beyond 10kb upstream and downstream of the TSS and bounded by the midpoints between the TSS and the next upstream and downstream TSSs.
+#'
+#' Built on Tue Aug 11 16:50:59 2020.
+#'
+#' @format A \code{LocusDefinition} object with the following slots:
+#' \describe{
+#'     \item{granges}{A \code{GRanges} of the locus definitions with \code{mcols} for Entrez Gene ID \code{gene_id} and gene symbol \code{symbol}}
+#'     \item{dframe}{A \code{data.frame} of the locus definitions with columns for \code{chr}, \code{start}, \code{end}, \code{gene_id}, and \code{symbol}}
+#'     \item{genome.build}{A \code{character} indicating the genome build. In this case, hg19.}
+#'     \item{organism}{A \code{character} indicating the organism name. In this case, Homo sapiens.}
+#' }
+#' @source R packages: TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2 and org.Hs.eg.db_3.8.2. GENCODE resources: ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.annotation.gff3.gz and ftp://ftp.sanger.ac.uk/pub/gencode/Gencode_human/release_25/GRCh37_mapping/gencode.v25lift37.metadata.EntrezGene.gz
+"locusdef.hg19.10kb_outside"
+
