@@ -1,6 +1,6 @@
 Package: chipenrich.data
 Title: Companion package to chipenrich
-Version: 2.20.0
+Version: 2.21.0
 Date: 2021-11-21
 Authors@R: c(
 	person(c("Ryan P."),"Welch",role = c("aut","cph"),email = "welchr@umich.edu"),
