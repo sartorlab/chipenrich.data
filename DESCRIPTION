@@ -1,7 +1,7 @@
 Package: chipenrich.data
 Title: Companion package to chipenrich
-Version: 2.23.0
-Date: 2021-11-21
+Version: 2.23.1
+Date: 2023-03-29
 Authors@R: c(
 	person(c("Ryan P."),"Welch",role = c("aut","cph"),email = "welchr@umich.edu"),
 	person("Chee","Lee",role = c("aut"),email = "cheelee@umich.edu"),
@@ -52,4 +52,4 @@ Suggests:
 	TxDb.Rnorvegicus.UCSC.rn6.refGene
 VignetteBuilder: knitr
 RoxygenNote: 6.1.1
-Maintainer: Raymond G. Cavalcante <rcavalca@umich.edu>
+Maintainer: Kai Wang <wangdaha@umich.edu>
