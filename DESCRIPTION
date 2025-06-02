@@ -7,6 +7,7 @@ Authors@R: c(
 	person("Chee","Lee",role = c("aut"),email = "cheelee@umich.edu"),
 	person("Raymond G.","Cavalcante",role = c("aut"),email = "rcavalca@umich.edu"),
 	person("Kai","Wang",role = c("cre"),email = "wangdaha@umich.edu"),
+	person("Minghua","Li",role = c("cre"),email = "eric003x@gmail.com"),
 	person(c("Laura J."),"Scott",role = c("ths"), email = "ljst@umich.edu"),
 	person(c("Maureen A."),"Sartor",role = c("ths"),email = "sartorma@med.umich.edu"))
 Description: Supporting data for the chipenrich package. Includes pre-defined gene sets, gene locus definitions, and mappability estimates.
@@ -52,4 +53,4 @@ Suggests:
 	TxDb.Rnorvegicus.UCSC.rn6.refGene
 VignetteBuilder: knitr
 RoxygenNote: 6.1.1
-Maintainer: Kai Wang <wangdaha@umich.edu>
+Maintainer: Minghua Li <eric003x@gmail.com>
